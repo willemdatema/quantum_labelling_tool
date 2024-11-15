@@ -1,0 +1,92 @@
+/* https://ec.europa.eu/component-library/v1.15.0/eu/components/detail/eu-style-color/ */
+
+ec-blue {
+    color: #004494;
+}
+
+ec-blue-background {
+    background-color: #004494;
+}
+
+ec-yellow {
+    color: #ffd617;
+}
+
+ec-yellow-background {
+    background-color: #ffd617;
+}
+
+ec-grey {
+    color: #404040;
+}
+
+ec-grey-background {
+    background-color: #404040;
+}
+
+.scrollable-cell {
+    max-height: 60px; /* Set the maximum height for the cell */
+    max-width: 200px;
+    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-x: hidden;
+    white-space: normal; /* Prevent text from wrapping */
+    /* text-overflow: ellipsis; --> Display ellipsis (...) for overflowed text */
+    word-wrap: break-word; /* Ensure words break properly */
+}
+
+.scrollable-cell:hover { /* Optional: Add a visual cue like changing the cursor on hover */
+    cursor: pointer;
+}
+
+
+ /* Styles for the question mark icon */
+
+ .question-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    color: #fff;
+    background-color: #8e8f91; /* Bootstrap primary color */
+    border-radius: 50%; /* Circle shape */
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+/* Square style variant for the question mark */
+.question-mark.square {
+    border-radius: 4px; /* Small rounded corners for square */
+}
+
+/* Flex container for label and question mark */
+.label-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Flex container for question mark alignment */
+.input-container {
+    display: flex;
+    align-items: center;
+}
+
+.input-container input, .input-container textarea {
+    flex: 1; /* Allows the input to grow and take the full width */
+}
+
+ 
+.maturity-level {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 30px;
+    font-size: 18px;
+    color: #fff;
+    background-color: #8e8f91; /* Bootstrap primary color */
+    border-radius: 4px; /* Circle shape */
+    margin-left: 10px;
+}

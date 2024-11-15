@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}QUANTUM{% endblock %}
+
+{% block nav_dataset %}active{% endblock nav_dataset %}
+
+{% block content %}
+
+<div class="fluid-container mb-5">
+    <div class="row">
+        <h1 class="text-center mt-3" style="margin-bottom: 20px;">QUANTUM label</h1>
+
+        <div class="d-flex justify-content-center mb-5">
+            <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#helpSection" aria-expanded="false" aria-controls="helpSection">
+                How to Use the Label Page?
+            </button>
+        </div>
+
+        <div class="collapse" id="helpSection">
+            <div class="d-flex justify-content-center mb-5">
+                <div class="card card-body" style="max-width: 1000px;">
+                    <ul style="margin-bottom: 0%;">
+                        <li><b>Label Visualization</b>: The circular graph displays your dataset's performance across categories. The size of 
+                            each slice indicates the score: larger slices represent higher scores. The inner circle, showing the overall quality 
+                            score, remains static in size. Surrounding it are the EHDS categories and, finally, the DQ dimensions, which vary
+                            in size based on their scores.
+                        </li>
+                        <li><b>Assessment Score</b>: Below the graph is a star rating and numerical score that reflect your overall dataset quality.</li>
+                        <li><b>Table</b>: The table is organized to include:</li>
+                        <ul>
+                            <li>HDS Categories</li>
+                            <li>Dimension: name, weight, and score.</li>
+                        </ul>
+                        Click the "<b>+</b>" button next to each dimension to view the metrics that measure it:
+                        <ul>
+                            <li>For each metric, the definition, weight (to assess the dimension), and scores are shown.</li>
+                        </ul>
+                        <li><b>Categories</b>: The EHDS Categories represent broad areas of data quality. Each category contains one or more dimensions.</li>
+                        <li><b>Dimensions</b>: For each dimension, the name, the weight relative to other dimensions for calculating the overall score, and the respective
+                            score are displayed.
+                        </li>
+                        <li><b>Metrics</b>: For each metric, a definition, a weight (its importance in the dimension), and a score are provided, which you can review by expanding the dimensions via
+                            the "<b>+</b>" button.
+                        </li>
+                        <li><b>Download RDF</b>: Once reviewed, click "Download RDF label" to save the quality assessment in RDF format.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2 col-sm-12"></div>
+        <div class="col-md-8 col-sm-12">
+
+            <div class="text-center">
+                {{ label | safe }}
+            </div>
+
+            <h2 class="text-center mt-5">Assessment score</h2>
+
+            <div class="mt-3 text-center" style="margin-bottom: 65px;">
+                <p class="display-2">
+                    {{ stars | safe }}
+                </p>
+                <h4 style="margin-top: 20px; margin-bottom: 30px;">Final Score: {{ score|floatformat:2 }} / 100</h4>
+            </div>
+
+            <div class="row mt-3" style="margin-bottom: 45px;">
+                <div class="col-sm-3">
+                    <b>
+                        EHDS Category
+                    </b>
+                </div>
+                <div class="col-sm-3">
+                    <b>
+                        Dimension
+                    </b>
+                    <br>
+                    <small class="text-secondary">
+                        Metric Definition
+                    </small>
+                </div>
+                <div class="col-sm-3">
+                    <b>
+                        Dim. weight
+                    </b>
+                    <br>
+                    <small class="text-secondary">
+                        Metric weight
+                    </small>
+                </div>
+                <div class="col-sm-3">
+                    <b>
+                        Dim. score
+                    </b>
+                    <br>
+                    <small class="text-secondary">
+                        Metric score
+                    </small>
+                </div>
+            </div>
+
+            {% for category in results %}
+            <div class="row mt-5">
+                <div class="col-auto">
+                    <p>{{ category.name }}</p>
+                </div>
+                <div class="col">
+
+                </div>
+                <div class="col">
+
+                </div>
+                <div class="col">
+
+                </div>
+            </div>
+
+            <hr class="my-1">
+
+            {% for dimension in category.dimensions %}
+            <div class="row">
+                <div class="col-sm-3 text-center">
+                    <button class="btn btn-secondary" onclick="toggleVisibility('{{ dimension.name }}_button', '{{dimension.name}}_metrics')">
+                        <span id="{{ dimension.name }}_button">+</span>
+                    </button>
+                </div>
+                <div class="col-sm-3">
+                    <p>{{ dimension.name }}</p>
+                </div>
+                <div class="col-sm-3">
+                    {{ dimension.relevance|floatformat:2 }} %
+                    <span class="question-mark" data-bs-toggle="tooltip" title="This represents the weight of the dimension in the overall quality score calculation." style="cursor: pointer;">?</span>
+                </div>
+                <div class="col-sm-3">
+                    {{ dimension.score|floatformat:2 }} / 100
+                    <span class="question-mark" data-bs-toggle="tooltip" title="This represents the score of the dimension in the overall quality score calculation." style="cursor: pointer;">?</span>
+                </div>
+            </div>
+
+            <div id="{{dimension.name}}_metrics" hidden>
+                {% for metric in dimension.metrics %}
+                <div class="row">
+                    <div class="col-sm-3 mt-3">
+                    </div>
+                    <div class="col-sm-3">
+                        <p>
+                            <small class="text-secondary">
+                                {{ metric.definition }}
+                            </small>
+                        </p>
+                    </div>
+                    <div class="col-sm-3">
+                        <p>
+                            <small class="text-secondary">
+                                {{ metric.weight }} %
+                                <span class="question-mark" data-bs-toggle="tooltip" title="This represents the relative importance of each metric within a dimension, used to calculate the dimension's final score." style="cursor: pointer;">?</span>
+                            </small>
+                        </p>
+                    </div>
+                    <div class="col-sm-3">
+                        <p>
+                            <small class="text-secondary">
+                                {{ metric.score|floatformat:2 }}
+                                <span class="question-mark" data-bs-toggle="tooltip" title="This represents the metric score within a dimension, used to calculate the dimension's final score." style="cursor: pointer;">?</span>
+                            </small>
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+            {% endfor %}
+
+            <div class="mt-5">
+                <div class="row">
+                    <div class="col-sm-4 text-end">
+                        <a href="/dashboard">
+                            <button type="button" class="btn btn-primary">Go back</button>
+                        </a>
+                    </div>
+
+                    <div class="col-sm-4 text-center">
+                        <a href="/dataset/assessment/rdf?id={{ dataset_id }}">
+                            <button type="button" class="btn btn-secondary">Download RDF label</button>
+                        </a>
+                    </div>
+
+                    <div class="col-sm-4 text-start">
+                        <a href="/dataset/assessment?id={{dataset_id}}">
+                            <button type="button" class="btn btn-primary">Go to assesment</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-12"></div>
+    </div>
+</div>
+{% endblock %}

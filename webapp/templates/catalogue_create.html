@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}QUANTUM{% endblock %}
+
+{% block nav_dataset %}active{% endblock nav_dataset %}
+
+{% block content %}
+
+<div class="fluid-container">
+    <div class="row">
+        <div class="col-md-2 col-sm-12"></div>
+        <div class="col-md-8 col-sm-12">
+            <h2 class=" text-center mt-3 mb-3"><b>Create catalogue</b></h2>
+            <div class="card card-body mb-4" style="max-width: 1000px;">
+                <p class="text-center mb-0">
+                    On this page, you can create a new catalogue. Please fill in the fields below and click on the "Create" button to save 
+                    your catalogue. <br>Note that the catalogue created here is designed to provide a storyline for data quality assessment. It 
+                    follows the traditional format of cataloguing datasets. Once a dataset is also created, its quality is then assessed by 
+                    the QUANTUM tool.
+                </p>
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Name
+                        <span class="text-danger">*</span>
+                        <span class="question-mark" data-bs-toggle="tooltip" title="This is the name of the catalogue being created. 
+                        Choose a name for the catalogue." style="cursor: pointer;">?</span>
+                    </label>
+                    <input type="text" class="form-control" name="catalogue_title" maxlength="256" required>
+                    <small id="catalogue_title_count" class = "form-text text-muted">256 character left</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Version
+                        <span class="text-danger">*</span>
+                        <span class="question-mark" data-bs-toggle="tooltip" title="This is the version number of the catalogue being created. 
+                        Choose a version for the catalogue." style="cursor: pointer;">?</span>
+                    </label>
+                    <input type="number" step="0.01"  class="form-control" name="catalogue_version" required>
+                    <small id="catalogue_version_count" class = "form-text text-muted">Insert numbers</small>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success">Create</button>
+                </div>
+            </form>
+            <div class="text-center mt-3">
+                <a href="/dashboard">
+                    <button type="button" class="btn btn-primary">Go back</button>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-12"></div>
+    </div>
+</div>
+
+<script>
+// Update character counters for each field
+updateCharacterCount('catalogue_title', 'catalogue_title_count', 256);
+</script>
+{% endblock %}
