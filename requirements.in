@@ -1,0 +1,7 @@
+Django
+rdflib
+plotly
+pandas
+gunicorn
+whitenoise
+mysqlclient

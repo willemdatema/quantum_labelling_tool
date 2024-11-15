@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}QUANTUM{% endblock %}
+
+{% block nav_dataset %}active{% endblock nav_dataset %}
+
+{% block content %}
+
+
+<div class="fluid-container">
+    <div class="row">
+        <div class="col-md-2 col-sm-12"></div>
+        <div class="col-md-8 col-sm-12">
+            <h2 class=" text-center mt-3 mb-3"><b>Register dataset</b></h2>
+            <div class="card card-body mb-4" style="max-width: 1000px;">
+                <p class="text-center mb-0">
+                    On this page, you can create a new dataset. Please fill in the fields below and click on the "Create" button. <br>
+                    This dataset, together with the catalogue, supports the narrative flow leading up to the data quality assessment by the 
+                    QUANTUM tool.
+                </p>
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Catalogue
+                        <span class="text-danger">*</span>
+                        <span class="question-mark" data-bs-toggle="tooltip" title="This is the catalogue containing the dataset being created. 
+                        Choose a catalogue from the dropdown menu." style="cursor: pointer;">?</span>
+                    </label>
+                    <select name="dataset_catalogue" class="form-select">
+                        {% for catalogue in catalogues %}
+                        <option value="{{ catalogue.id }}" selected>
+                            {{ catalogue.title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Dataset HTTP URI
+                        <span class="question-mark" data-bs-toggle="tooltip" title="This is the HTTP URI (Unique Resource Identifier) of the dataset. 
+                        Provide if available for further references." style="cursor: pointer;">?</span>
+                    </label>
+                    <input type="text" class="form-control" name="dataset_URI" maxlength="512" id="dataset_URI">
+                    <small id="dataset_URI_count" class="form-text text-muted">512 characters left</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Dataset Name
+                        <span class="text-danger">*</span>
+                        <span class="question-mark" data-bs-toggle="tooltip" title="Enter the name of the dataset here.">?</span>
+                    </label>
+                    <input type="text" class="form-control" name="dataset_name" maxlength="256" id="dataset_name" required>
+                    <small id="dataset_name_count" class="form-text text-muted">256 characters left</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">
+                        Dataset Description
+                        <span class="text-danger">*</span>
+                        <span class="question-mark" data-bs-toggle="tooltip" title="Provide a description for the dataset.">?</span>
+                    </label>
+                    <textarea class="form-control" name="dataset_description" rows="3" required></textarea>
+                    <small id="dataset_description_count" class="form-text text-muted">No characters limits</small>
+                </div>
+                <!--                <div class="mb-3">-->
+                <!--                    <label class="form-label">Version</label>-->
+                <!--                    <input type="number" class="form-control" name="dataset_version" required>-->
+                <!--                </div>-->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success">Create</button>
+                </div>
+            </form>
+            <div class="text-center mt-4 mb-3">
+                <a href="/dashboard">
+                    <button type="button" class="btn btn-primary">Go back</button>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-12"></div>
+    </div>
+</div>
+
+<script>
+    // Update character counters for each field
+    updateCharacterCount('dataset_URI', 'dataset_URI_count', 512);
+    updateCharacterCount('dataset_name', 'dataset_name_count', 256);
+    // updateCharacterCount('dataset_description', 'dataset_description_count', 512);
+</script>
+{% endblock %}
