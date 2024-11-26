@@ -1,0 +1,28 @@
+{
+  "title": "QUANTUM - The Health Data Quality Label",
+  "description": "The QUANTUM Data Quality Labelling Tool is a key component of the European Health Data Space (EHDS) initiative, designed to address the challenge of ensuring that health datasets are of high quality, accessible, and interoperable across EU member states. As healthcare data plays an increasingly vital role in research, policy, and innovation, this tool provides a standardized mechanism to evaluate and label the **quality, utility, and maturity** of datasets, supporting stakeholders such as healthcare institutions, research organizations, and policymakers.",
+  "creators": [
+    {
+      "orcid": "0000-0003-1843-9209",
+      "affiliation": "Universitat Politècnica de València",
+      "name": "Sánchez-García, Ángel"
+    },
+    {
+      "orcid": "0009-0000-4373-0095",
+      "affiliation": "Sciensano",
+      "name": "Proietti Mercuri, Claudio"
+    }
+  ],
+  "keywords": [
+    "DQ",
+    "Labelling",
+    "Tool",
+    "QUANTUM"
+  ],
+  "license": "TO_BE_DEFINED",
+  "grants": [
+    {
+      "id": "TO_FILL"
+    }
+  ]
+}
