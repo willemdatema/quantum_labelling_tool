@@ -22,6 +22,7 @@ Ultimately, the QUANTUM tool aims to foster **trust in health data** across Euro
 
 Python 3.11
 
+
 ## Installation steps
 ```bash
 git clone [repository_url]
@@ -63,9 +64,21 @@ docker exec -it quantumtoolwebapp bash
 
 ## Technology Stack
 
-- **Backend:** Python 3 (Django Framework)
-- **Frontend:** HTML, CSS, JavaScript (Bootstrap 5)
-- **Database:** SQLite3 (development) or MariaDB (production)
+### Backend
+- Python 3
+- Django
+### Frontend
+- HTML
+- CSS*
+- JavaScript*
+
+*It is used Bootstrap 5.3
+
+### Database
+#### Development
+- SQLite3
+#### Production (Docker)
+- MariaDB
 
 ## Credits
 **Version:** 0.1
