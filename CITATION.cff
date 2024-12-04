@@ -1,8 +1,5 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below:"
-title: "QUANTUM - The Health Data Quality Label"
-version: "0.1.0"
-date-released: "15/11/2024"
 authors:
 - family-names: "Proietti Mercuri"
   given-names: "Claudio"
@@ -10,6 +7,9 @@ authors:
 - family-names: "Sánchez-García"
   given-names: "Ángel"
   orcid: "https://orcid.org/0000-0003-1843-9209"
-url: "https://quantumproject.eu/"
-repository-code: "https://github.com/quantum-label/quantum_labelling_tool/"
-license: "TO FILL"
+title: "QUANTUM - The Health Data Quality Label"
+version: "0.1.0"
+doi: "TO FILL by Zenodo"
+date-released: "15/11/2024"
+url: "https://github.com/quantum-label/quantum_labelling_tool/"
+license: "http://creativecommons.org/licenses/by-nc/4.0/"
