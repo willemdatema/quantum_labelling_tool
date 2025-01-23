@@ -111,7 +111,12 @@
                                                 {{ dataset.version }}
                                             </p>
                                             <p>
-                                                <b>Creator:</b>
+                                                <b>Data controller:</b>
+                                                <br>
+                                                {{ organization }}
+                                            </p>
+                                            <p>
+                                                <b>Reporter:</b>
                                                 <br>
                                                 {{ dataset.user }}
                                             </p>
@@ -181,7 +186,7 @@
                                 </div>
                             </div>
                             {% else %}
-                            <small class="text-secondary">Not owner</small>
+                            <small class="text-secondary">Not reporter</small>
                             {% endif %}
                         </td>
                     </tr>
