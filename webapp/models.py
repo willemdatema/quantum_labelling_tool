@@ -157,6 +157,7 @@ class DQMetric(models.Model):
     measurement_approach = models.TextField(blank=True, null=True)
     formula = models.TextField(blank=True, null=True)
     weight = models.FloatField()
+    needs_report_URL = models.BooleanField(default=False)
 
     dq_dimension = models.ForeignKey(
         'DQDimension',
@@ -186,6 +187,7 @@ class DQCategoricalMetricCategory(models.Model):
 
 class DQMetricValue(models.Model):
     value = models.CharField(max_length=256, blank=True, null=True)
+    report_URL = models.TextField(blank=True, null=True, default=None)
 
     dq_metric = models.ForeignKey(
         'DQMetric',
@@ -197,4 +199,4 @@ class DQMetricValue(models.Model):
     )
 
     def __str__(self):
-        return f'{self.dq_metric.definition} - {self.value}'
+        return f'{self.dq_assessment.id} - {self.dq_metric.definition} - {self.value}'

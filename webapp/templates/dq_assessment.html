@@ -263,6 +263,15 @@
                                                                onchange="validateAndHighlightFieldsByIds(['{{ category.id }}', '{{ category.id }}_{{ dimension.id }}', '{{ category.id }}_{{ dimension.id }}_{{ metric.id }}'], true)"
                                                                placeholder="Insert here the value...">
                                                         {% endif %}
+
+                                                        {% if metric.needs_report_URL %}
+                                                        <input type="text" class="form-control mt-1"
+                                                               name="url_metric_{{ metric.id }}"
+                                                               onchange="validateAndHighlightFieldsByIds(['{{ category.id }}', '{{ category.id }}_{{ dimension.id }}', '{{ category.id }}_{{ dimension.id }}_{{ metric.id }}'], true)"
+                                                               placeholder="Report URL (https://www.example.com)"
+                                                               value="{{ metric.report_URL }}">
+                                                        {% endif %}
+
                                                         <script>
                                                             validateAndHighlightFieldsByIds(['{{ category.id }}', '{{ category.id }}_{{ dimension.id }}', '{{ category.id }}_{{ dimension.id }}_{{ metric.id }}'])
                                                         </script>
