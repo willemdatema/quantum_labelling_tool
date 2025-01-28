@@ -857,7 +857,8 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
             results.append({
                 'name': category.name,
                 'dimensions': [],
-                'score': 0  # Initialized to 0. This will accumulate the total score for the category.
+                'score': 0,  # Initialized to 0. This will accumulate the total score for the category.
+                'all_dimensions_ok': True
             })
 
             dimensions = DQDimension.objects.filter(ehds_category=category)
@@ -868,7 +869,8 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                     'relevance': (dimension.relevance / dimensions_total_relevance) * 100,
                     # (inside the table of the label page) this formula make the dimension scores from decimal (0.1) to percentage (10) --> affecting also the numbers of stars since you would add 0.1 instead of 10
                     'metrics': [],
-                    'score': 0
+                    'score': 0,
+                    'all_metrics_ok': True
                 })
 
                 metrics = DQMetric.objects.filter(dq_dimension=dimension)
@@ -876,39 +878,43 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                     results[-1]['dimensions'][-1]['metrics'].append({
                         'definition': metric.definition,
                         'weight': int(metric.weight),
-                        # #this part shows metrics weights inside the table of the label page. (removed the *100 cause I increase the metrics weight by 100)
-                        'score': 0
+                        'score': 0,
+                        'is_metric_ok': False
                     })
 
-                    dq_metric_value = DQMetricValue.objects.filter(dq_assessment=assessment,
-                                                                   dq_metric=metric)  # This retrieves the metric values related to the current assessment and metric.
-                    current_value = None  # can you use also 0 instead of none? --> Yes, you can use 0 instead of None. However, in this case, the author is using None to indicate that the value is not set. If the value is set, it will be a string. If it is not set, it will be None.
+                    dq_metric_value = DQMetricValue.objects.filter(dq_assessment=assessment, dq_metric=metric)
+                    current_value = None
+                    metric_score = 0
 
-                    # If the metric is filled then we assign the value, else it is None
-                    if len(dq_metric_value) >= 1:  # If there's at least one metric value (len(dq_metric_value) >= 1), the current value is extracted using .first().
+                    if len(dq_metric_value) >= 1:
                         current_value = str(dq_metric_value.first().value)
                     else:
                         pass
 
-                    # For the categorical metrics we provide the possible values
-                    if getattr(metric,
-                               'dqcategoricalmetric') is not None and current_value:  # If the metric is not a categorical metric (i.e., doesn't have this attribute), getattr will return None, so this ensures that we only proceed if it is indeed a categorical metric. Then This checks if current_value has been assigned a value (i.e., it's not None or empty). If current_value is valid, we proceed with calculating the score.
+                    if getattr(metric, 'dqcategoricalmetric') is not None and current_value:
                         current_value = int(current_value)
                         metric_categories = DQCategoricalMetricCategory.objects.filter(
                             dq_categorical_metric=metric
-                        ).count()  # This checks if the current metric is a categorical metric (i.e., it has multiple pre-defined values).
+                        ).count()
 
-                        metric_score = current_value / (
-                                metric_categories - 1)  # If 3 : 0, 1, 2 -> 0% 50% 100% + --> This part normalizes the current value. If you have 3 categories (e.g., 0 = Low, 1 = Medium, 2 = High), you would divide by 2 (i.e., metric_categories - 1), to convert the current value into a percentage scale (0%, 50%, 100%).
-                        metric_score = metric_score * (metric.weight / 100) * results[-1]['dimensions'][-1][
-                            'relevance']  # This step takes the normalized score (current_value / (metric_categories - 1)) from the previous line and adjusts it further based on the weight of the metric and the relevance of the dimension.
-                        results[-1]['dimensions'][-1]['metrics'][-1][
-                            'score'] = metric_score  # here we assign the metric score above calculated to the score key of the last metric in the last dimension of the last category.
-                        results[-1]['dimensions'][-1][
-                            'score'] += metric_score  # here we add the metric score above calculated to the score key of the last dimension in the last category. this is because the dimension score is calculated as the sum of all metric scores within that dimension.
+                        # If 3 : 0, 1, 2 -> 0% 50% 100%
+                        metric_score = current_value / (metric_categories - 1)
+                        metric_score = metric_score * (metric.weight / 100) * results[-1]['dimensions'][-1]['relevance']
 
-                total_score += results[-1]['dimensions'][-1][
-                    'score']  # This is exactly line 774 above and adds the score of the last dimension (just calculated) to the total score for all dimensions and categories.
+                        results[-1]['dimensions'][-1]['metrics'][-1]['score'] = metric_score
+                        results[-1]['dimensions'][-1]['score'] += metric_score
+
+                    results[-1]['dimensions'][-1]['metrics'][-1]['is_metric_ok'] = metric_score > 0
+                    results[-1]['dimensions'][-1]['all_metrics_ok'] = results[-1]['dimensions'][-1][
+                                                                          'all_metrics_ok'] and \
+                                                                      results[-1]['dimensions'][-1]['metrics'][-1][
+                                                                          'is_metric_ok']
+
+                # This is exactly line 774 above and adds the score of the last dimension (just calculated) to the total score for all dimensions and categories.
+                total_score += results[-1]['dimensions'][-1]['score']
+
+                results[-1]['all_dimensions_ok'] = results[-1]['all_dimensions_ok'] and results[-1]['dimensions'][-1][
+                    'all_metrics_ok']
 
         # Drawing the stars
         stars_element = generate_assessment_stars(total_score)
