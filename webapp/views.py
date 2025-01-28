@@ -1,22 +1,21 @@
-import json
 import os
 from datetime import datetime
 
-from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from django.db.models import Sum
 from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render, redirect
 
 from code.fdp.constants import FDP_DEVELOPMENT_URL
-from code.fdp.fdp import create_catalogue, publish_catalogue
 from code.helpers.django import redirect_with_message, generate_assessment_stars
 from code.label.label import plot_label, compute_scores
-from code.rdf.ttl_templating import template_catalogue, generate_ttl_file
+from code.rdf.ttl_templating import generate_ttl_file
 # from code.rdf.ttl_templating import template_catalogue, fill_full_template
 from webapp.models import Dataset, DQAssessment, DQMetric, DQMetricValue, EHDSCategory, DQDimension, \
-    DQCategoricalMetricCategory, Organization, UserOrganization, Catalogue, MaturityDimension, MaturityDimensionLevel, \
+    DQCategoricalMetricCategory, UserOrganization, Catalogue, MaturityDimension, MaturityDimensionLevel, \
     MaturityDimensionValue
 
 
@@ -230,8 +229,10 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
                     current_value = None
 
                     # If the metric is filled then we assign the value, else it is None
+                    current_dq_metric_value = None
                     if len(dq_metric_value) >= 1:
-                        current_value = str(dq_metric_value.first().value)
+                        current_dq_metric_value = dq_metric_value.first()
+                        current_value = str(current_dq_metric_value.value)
 
                     values[category.name]['dimensions'][-1]['metrics'].append({
                         'id': metric.id,
@@ -242,8 +243,19 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
                         'measurement_approach': metric.measurement_approach,
                         'formula': metric.formula,
                         'weight': metric.weight,
-                        'value': current_value
+                        'value': current_value,
+                        'needs_report_URL': metric.needs_report_URL,
+                        'report_URL': ''
                     })
+
+                    if current_dq_metric_value is not None:
+                        report_url = current_dq_metric_value.report_URL
+
+                        if not report_url:
+                            report_url = ''
+
+                        values[category.name]['dimensions'][-1]['metrics'][-1][
+                            'report_URL'] = report_url
 
                     # For the categorical metrics we provide the possible values
                     if getattr(metric, 'dqcategoricalmetric') is not None:
@@ -295,10 +307,15 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
                 else:
                     continue
 
+                metric_report_url = request.POST.get(f'url_{key}', None)
+
+                if type(metric_report_url) is str and metric_report_url.strip() == '':
+                    metric_report_url = None
+
                 # If metric value is not "empty"
                 if metric_value != '-' and metric_value != '':
                     metrics.append(
-                        (metric_key, metric_value)
+                        (metric_key, metric_value, metric_report_url)
                     )
         assessment = dataset.dq_assessment
 
@@ -308,15 +325,58 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
             dq_metric = DQMetric.objects.filter(id=metric[0]).first()
 
             value = metric[1]
-            dq_metric_value, created = DQMetricValue.objects.get_or_create(
-                dq_assessment=assessment,
-                dq_metric=dq_metric
+            report_url = metric[2]
+            validated_report_url = None
+            is_report_url_valid = False
+
+            if report_url:
+                url_validator = URLValidator()
+                try:
+                    url_validator(report_url)
+                    validated_report_url = report_url
+                    is_report_url_valid = True
+                except ValidationError:
+                    validated_report_url = None
+
+            lookup_fields = {
+                'dq_metric': dq_metric,
+                'dq_assessment': assessment,
+            }
+
+            if validated_report_url:
+                update_fields = {
+                    'report_URL': validated_report_url,
+                    'value': value
+                }
+            else:
+                update_fields = {
+                    'value': value
+                }
+
+            previous_dq_metric_value = DQMetricValue.objects.filter(**lookup_fields).first()
+
+            dq_metric_value, created = DQMetricValue.objects.update_or_create(
+                defaults=update_fields,
+                **lookup_fields
             )
 
-            if dq_metric_value.value != value:
-                changes.append(dq_metric.dq_dimension.name)
+            if created:
+                changes.append(f'{dq_metric.dq_dimension.name} reported')
 
-            dq_metric_value.value = value
+                if is_report_url_valid:
+                    changes.append(f'{dq_metric.dq_dimension.name} URL report added {report_url}')
+                else:
+                    changes.append(f'{dq_metric.dq_dimension.name} URL report is not valid: ({report_url})')
+            else:
+                if previous_dq_metric_value:
+                    if previous_dq_metric_value.value != value:
+                        changes.append(f'{dq_metric.dq_dimension.name} updated')
+
+                    if previous_dq_metric_value.report_URL != report_url:
+                        if is_report_url_valid:
+                            changes.append(f'{dq_metric.dq_dimension.name} URL report updated ({report_url})')
+                        else:
+                            changes.append(f'{dq_metric.dq_dimension.name} URL report is not valid ({report_url})')
 
             dq_metric_value.save()
 
