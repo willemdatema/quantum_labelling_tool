@@ -154,6 +154,7 @@ def user_dashboard_view(request: HttpRequest) -> HttpResponse:
                 'id': dataset.id,
                 'user': dataset.catalogue.user.username,
                 'catalogue': dataset.catalogue.title,
+                'organization': user_organization.organization.name,
                 'name': dataset.name,
                 'description': dataset.description,
                 'version': dataset.version,
