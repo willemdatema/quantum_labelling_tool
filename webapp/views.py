@@ -919,7 +919,9 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                 'name': category.name,
                 'dimensions': [],
                 'score': 0,  # Initialized to 0. This will accumulate the total score for the category.
-                'all_dimensions_ok': True
+                'all_dimensions_ok': True,
+                'id': category.id
+                
             })
 
             dimensions = DQDimension.objects.filter(ehds_category=category)
@@ -931,15 +933,32 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                     # (inside the table of the label page) this formula make the dimension scores from decimal (0.1) to percentage (10) --> affecting also the numbers of stars since you would add 0.1 instead of 10
                     'metrics': [],
                     'score': 0,
-                    'all_metrics_ok': True
+                    'all_metrics_ok': True,
+                    'id': dimension.id
                 })
 
                 metrics = DQMetric.objects.filter(dq_dimension=dimension)
                 for metric_index, metric in enumerate(metrics):
+                    metric_label = f"Metric #{metric_index + 1}"
+                    metric_value = DQMetricValue.objects.filter(dq_assessment=assessment, dq_metric=metric).first()
+                    answer_text = "Not answered"
+                    
+                    if metric_value:
+                        # Fetch the corresponding text for the categorical value
+                        answer_text = metric_value.value
+                        if metric_value.value.isdigit():
+                            category_match = DQCategoricalMetricCategory.objects.filter(
+                                dq_categorical_metric=metric, value=int(metric_value.value)
+                            ).first()
+                            if category_match:
+                                answer_text = category_match.text
+
                     results[-1]['dimensions'][-1]['metrics'].append({
                         'definition': metric.definition,
                         'weight': int(metric.weight),
                         'score': 0,
+                        'metric_label': metric_label,
+                        'answer': answer_text,	
                         'is_metric_ok': False
                     })
 

@@ -223,7 +223,7 @@
                                                                 <p>{{ metric.additional_information }}</p>-->
                                                                 <p><b>Recommended Measurement Approach</b><br>
                                                                     {{ metric.measurement_approach | safe }}</p>
-                                                                <p><b>Suggested Formula</b><br>
+                                                                <p><b>How to measure</b><br>
                                                                     {{ metric.formula }}</p>
                                                                 {% if metric.weight != 100 %}
                                                                 <p><b>Weight</b><br>
@@ -299,7 +299,7 @@
 <div class="row mt-5">
     <div class="col-sm-4 text-end">
         <a href="/dashboard">
-            <button id="go_back" type="button" class="btn btn-primary">Go back</button>
+            <button id="go_back" type="button" class="btn btn-primary">Go to DQ Dashboard</button>
         </a>
     </div>
     <div class="col-sm-4 text-center">
@@ -309,7 +309,7 @@
     </div>
     <div class="col-sm-4 text-start">
         <a href="/dataset/label?id={{dataset.id}}">
-            <button id="go_rdf" type="button" class="btn btn-primary">Go to label</button>
+            <button id="go_rdf" type="button" class="btn btn-primary">Go to DQ label</button>
         </a>
     </div>
 </div>
