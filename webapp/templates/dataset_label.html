@@ -67,6 +67,8 @@
                 <h4 style="margin-top: 20px; margin-bottom: 30px;">Final Score: {{ score|floatformat:2 }} / 100</h4>
             </div>
 
+            {% if information_box_needed %}
+
             <div class="row mt-5">
                 <h2>
                     Comments
@@ -101,6 +103,7 @@
                     {% endfor %}
                 </div>
             </div>
+            {% endif %}
 
             <div class="row mt-3">
                 <h2>

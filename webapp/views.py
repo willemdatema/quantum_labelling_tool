@@ -842,6 +842,10 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                 f'Dataset not existing!'
             )
 
+
+        # Needs to add 0 score box
+        information_box_needed = False
+
         # Compute the label plot
         label = plot_label(dataset)
 
@@ -905,10 +909,8 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                         results[-1]['dimensions'][-1]['score'] += metric_score
 
                     results[-1]['dimensions'][-1]['metrics'][-1]['is_metric_ok'] = metric_score > 0
-                    results[-1]['dimensions'][-1]['all_metrics_ok'] = results[-1]['dimensions'][-1][
-                                                                          'all_metrics_ok'] and \
-                                                                      results[-1]['dimensions'][-1]['metrics'][-1][
-                                                                          'is_metric_ok']
+                    results[-1]['dimensions'][-1]['all_metrics_ok'] = results[-1]['dimensions'][-1]['all_metrics_ok'] and results[-1]['dimensions'][-1]['metrics'][-1]['is_metric_ok']
+                    information_box_needed = information_box_needed or not results[-1]['dimensions'][-1]['all_metrics_ok']
 
                 # This is exactly line 774 above and adds the score of the last dimension (just calculated) to the total score for all dimensions and categories.
                 total_score += results[-1]['dimensions'][-1]['score']
@@ -927,7 +929,8 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                 'results': results,
                 'score': total_score,
                 'stars': stars_element,
-                'dataset_id': dataset_id
+                'dataset_id': dataset_id,
+                'information_box_needed': information_box_needed
             }
         )
     else:
