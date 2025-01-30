@@ -323,6 +323,7 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
         changes = []
         for metric in metrics:
             dq_metric = DQMetric.objects.filter(id=metric[0]).first()
+            metric_needs_report = dq_metric.needs_report_URL
 
             value = metric[1]
             report_url = metric[2]
@@ -363,20 +364,22 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
             if created:
                 changes.append(f'{dq_metric.dq_dimension.name} reported')
 
-                if is_report_url_valid:
-                    changes.append(f'{dq_metric.dq_dimension.name} URL report added {report_url}')
-                else:
-                    changes.append(f'{dq_metric.dq_dimension.name} URL report is not valid: ({report_url})')
+                if metric_needs_report:
+                    if is_report_url_valid:
+                        changes.append(f'{dq_metric.dq_dimension.name} URL report added {report_url}')
+                    else:
+                        changes.append(f'{dq_metric.dq_dimension.name} URL report is not valid: ({report_url})')
             else:
                 if previous_dq_metric_value:
                     if previous_dq_metric_value.value != value:
                         changes.append(f'{dq_metric.dq_dimension.name} updated')
 
-                    if previous_dq_metric_value.report_URL != report_url:
-                        if is_report_url_valid:
-                            changes.append(f'{dq_metric.dq_dimension.name} URL report updated ({report_url})')
-                        else:
-                            changes.append(f'{dq_metric.dq_dimension.name} URL report is not valid ({report_url})')
+                    if metric_needs_report:
+                        if previous_dq_metric_value.report_URL != report_url:
+                            if is_report_url_valid:
+                                changes.append(f'{dq_metric.dq_dimension.name} URL report updated ({report_url})')
+                            else:
+                                changes.append(f'{dq_metric.dq_dimension.name} URL report is not valid ({report_url})')
 
             dq_metric_value.save()
 
