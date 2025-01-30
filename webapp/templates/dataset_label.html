@@ -8,6 +8,11 @@
 
 {% block content %}
 
+<script type="text/javascript" async 
+  src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type="text/javascript" async 
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
 <div class="fluid-container mb-5">
     <div class="row">
         <h1 class="text-center mt-3" style="margin-bottom: 20px;">QUANTUM label</h1>
@@ -51,7 +56,7 @@
                 {{ label | safe }}
             </div>
 
-            <h2 class="text-center mt-5">Assessment score <span class="question-mark" data-bs-toggle="tooltip" title="Click on the Final Score for more information on the Stars and Score calculation." style="cursor: pointer;">?</span></h2>
+            <h2 class="text-center mt-5">Assessment score</h2>
 
 
             <div class="mt-3 text-center">
@@ -73,14 +78,17 @@
                                 <p>
                                     <b>Stars Claculation:</b>
                                     <br>
-                                    <p> Write how the stars are calculated</p>
+                                    <p> ★ = 25% (median) of DQ reached <br> ★★ = 45% of DQ reached <br> ★★★ = 60% of DQ reached <br> ★★★★ = 80% of DQ reached <br> ★★★★★ = 90% of DQ reached</p>
                                 </p>
                                 <hr>
                                 <p>
                                     <b>Final Score Calculation:</b>
                                     <br>
-                                    <p> Write how the final score is calculated</p>
                                 </p>
+                                <div class="text-center overflow-auto">
+                                    <p> The Total Score is a weighted average that measures the dataset's quality. Each dimension's score is based on its importance (compared to the other dimensions) multiplied by the performance of its metrics. The dimension score is normalized by the total weight of all dimensions and then summed with all the other dimension scores.</p><br>
+                                    <p> \[\text{Total Score} =\sum_{i=1}^{n=12} \frac{\text{Dimension}_i^{\text{weight}} \times \left[\left(\text{metric}_1^{\text{weight}} \times \text{metric value}_1 \right) + \left(\text{metric}_2^{\text{weight}} \times \text{metric value}_2 \right) \right]}{\text{Total Weight of Dimensions}} \times 100\]</p>
+                                </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
