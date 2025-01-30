@@ -323,6 +323,7 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
         changes = []
         for metric in metrics:
             dq_metric = DQMetric.objects.filter(id=metric[0]).first()
+            metric_needs_report = dq_metric.needs_report_URL
 
             value = metric[1]
             report_url = metric[2]
@@ -363,20 +364,22 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
             if created:
                 changes.append(f'{dq_metric.dq_dimension.name} reported')
 
-                if is_report_url_valid:
-                    changes.append(f'{dq_metric.dq_dimension.name} URL report added {report_url}')
-                else:
-                    changes.append(f'{dq_metric.dq_dimension.name} URL report is not valid: ({report_url})')
+                if metric_needs_report:
+                    if is_report_url_valid:
+                        changes.append(f'{dq_metric.dq_dimension.name} URL report added {report_url}')
+                    else:
+                        changes.append(f'{dq_metric.dq_dimension.name} URL report is not valid: ({report_url})')
             else:
                 if previous_dq_metric_value:
                     if previous_dq_metric_value.value != value:
                         changes.append(f'{dq_metric.dq_dimension.name} updated')
 
-                    if previous_dq_metric_value.report_URL != report_url:
-                        if is_report_url_valid:
-                            changes.append(f'{dq_metric.dq_dimension.name} URL report updated ({report_url})')
-                        else:
-                            changes.append(f'{dq_metric.dq_dimension.name} URL report is not valid ({report_url})')
+                    if metric_needs_report:
+                        if previous_dq_metric_value.report_URL != report_url:
+                            if is_report_url_valid:
+                                changes.append(f'{dq_metric.dq_dimension.name} URL report updated ({report_url})')
+                            else:
+                                changes.append(f'{dq_metric.dq_dimension.name} URL report is not valid ({report_url})')
 
             dq_metric_value.save()
 
@@ -903,6 +906,10 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                 f'Dataset not existing!'
             )
 
+
+        # Needs to add 0 score box
+        information_box_needed = False
+
         # Compute the label plot
         label = plot_label(dataset)
 
@@ -985,10 +992,8 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                         results[-1]['dimensions'][-1]['score'] += metric_score
 
                     results[-1]['dimensions'][-1]['metrics'][-1]['is_metric_ok'] = metric_score > 0
-                    results[-1]['dimensions'][-1]['all_metrics_ok'] = results[-1]['dimensions'][-1][
-                                                                          'all_metrics_ok'] and \
-                                                                      results[-1]['dimensions'][-1]['metrics'][-1][
-                                                                          'is_metric_ok']
+                    results[-1]['dimensions'][-1]['all_metrics_ok'] = results[-1]['dimensions'][-1]['all_metrics_ok'] and results[-1]['dimensions'][-1]['metrics'][-1]['is_metric_ok']
+                    information_box_needed = information_box_needed or not results[-1]['dimensions'][-1]['all_metrics_ok']
 
                 # This is exactly line 774 above and adds the score of the last dimension (just calculated) to the total score for all dimensions and categories.
                 total_score += results[-1]['dimensions'][-1]['score']
@@ -1007,7 +1012,8 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                 'results': results,
                 'score': total_score,
                 'stars': stars_element,
-                'dataset_id': dataset_id
+                'dataset_id': dataset_id,
+                'information_box_needed': information_box_needed
             }
         )
     else:

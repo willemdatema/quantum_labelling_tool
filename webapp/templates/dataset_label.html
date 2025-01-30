@@ -88,8 +88,11 @@
                         </div>
                     </div>
                 </div>
+               
+            {% if information_box_needed %}
 
-                <h2 style="margin-top: 50px;">
+            <div class="row mt-5">
+                <h2>
                     Comments
                 </h2>
                 <hr>
@@ -122,6 +125,7 @@
                     {% endfor %}
                 </div>
             </div>
+            {% endif %}
 
             <div class="row mt-5">
                 <h2>
