@@ -11,8 +11,11 @@
 <h3 class="text-center mt-3 mb-3"> {{user.get_username}}'s DQ Dashboard</h3>
 
 <div class="d-flex justify-content-center">
-    <button class="btn btn-secondary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#helpSection" aria-expanded="false" aria-controls="helpSection">
+    <button class="btn btn-secondary mb-3 me-3" type="button" data-bs-toggle="collapse" data-bs-target="#helpSection" aria-expanded="false" aria-controls="helpSection">
         How to Use the Dashboard?
+    </button>
+    <button class="btn btn-secondary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#helpSection2" aria-expanded="false" aria-controls="helpSection">
+        Dataset & Catalogue Definitions
     </button>
 </div>
 
@@ -44,6 +47,39 @@
                     <li><b>Create a Catalogue</b>: Click "Create catalogue" to add a new catalogue, which will be stored in the FDP.</li>
                     <li><b>Modify a Catalogue</b>: Click the "Modify" button next to your catalogue to update its information.</li>
                     <li><b>Delete a Catalogue</b>: Click the "Delete" button to permanently remove the catalogue. <b>Warning:</b> This action is irreversible.</li>
+                </ul>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="collapse" id="helpSection2">
+    <div class="d-flex justify-content-center mb-5">
+        <div class="card card-body" style="max-width: 1000px;">
+            <p class="text-center"><b>Data Catalogue Definition</b></p>
+            <hr style="width: 75%; margin: auto">
+            <ul style="margin-top: 2%;">
+                <ol>
+                    A Catalogue can have two definitions, comprising: 1. data or 2. metadata. <br>
+                    <li>A data Catalogue (or Catalog) is a curated collection of <b>datasets</b> and <b>data services</b> that are managed and published by an organisation or entity.</li>
+                    <li>A data catalogue is a curated collection of <b>metadata</b> about datasets that are managed and published by an organisation or entity.</li>
+                </ol>
+            </ul>
+        
+            <p class="text-center"><b>Dataset Definition</b></p>
+            <hr style="width: 75%; margin: auto">
+            <ul style="margin-top: 2%;">
+                <ul>
+                    <b>A Dataset is a collection of data, published or curated by a single source, and available for access or download in one or more formats.</b><br>
+                    <i style="font-size: small;">Within the context of the EHDS (European Health Data Space) Regulation proposal [EUR-Lex 52022PC0197 (Art.44)], access to such datasets must adhere to principles of data minimisation and purpose limitation. This ensures that only the data relevant and necessary for specific processing purposes is provided. This data can be in either anonymised or pseudonymised format depending on the feasibility of achieving the processing objectives.</i><br>
+                    <br>
+                    <p class="text-center">Datasets Examples</p>
+                    <p>(1) <b>A complex dataset:</b> A set of three databases related to a specific cohort of cancer patients:</p>
+                    <li>A relational database of the patients' medical history;</li>
+                    <li>A set of the patients' cancerous cell images;</li>
+                    <li>The logs of the microscope used to generate these images at the molecular level.</li>
+                    <p style="margin-top: 15px;">These three databases can be used together via shared identifiers (patient identifier in medical history & cancerous cell images, images belonging to batches whose identifier can be found in both images & microscope logs). </p>
+                    <br>
+                    (2) <b>A simple dataset:</b> database, a CV file, etc. 
                 </ul>
             </ul>
         </div>
