@@ -223,8 +223,6 @@
                                                                 <p>{{ metric.additional_information }}</p>-->
                                                                 <p><b>Recommended Measurement Approach</b><br>
                                                                     {{ metric.measurement_approach | safe }}</p>
-                                                                <p><b>How to measure</b><br>
-                                                                    {{ metric.formula }}</p>
                                                                 {% if metric.weight != 100 %}
                                                                 <p><b>Weight</b><br>
                                                                     {{ metric.weight|floatformat:0}}%</p>
