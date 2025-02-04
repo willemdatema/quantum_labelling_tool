@@ -26,12 +26,13 @@ Python 3.11
 
 
 ## Installation steps
+
 ```bash
 git clone [repository_url]
 cd [repository_directory]
 pip install -r requirements.txt
-python manage.py createsuperuser # for creating root user if desired (current root user is root for username and password)
 python manage.py migrate # if database is not generated previously 
+python manage.py createsuperuser # for creating root user if desired (current root user is root for username and password)
 ```
 
 ## Execution
@@ -46,10 +47,18 @@ python manage.py runserver 0.0.0.0:8000
 
 ## Dockerizing
 
-- Create a folder named "QUANTUM"
-- Create a folder with all the files of the project "webapp"
-- In the "webapp" folder put all the files but the docker folder as well as the .git folder
-- In the "QUANTUM" folder copy the ".env", "docker-compose.yml", "Dockerfile", "quantum_init.sql" and "requirements.txt" files.
+- Download the repository. When unzipped, the folder will be named "quantum_labelling_tool"
+- For Dockerizing create a folder called "QUANTUM" where needed
+- Inside QUANTUM create the folder "online_quantum_tool", which will contain the django web app.
+- From "quantum_labelling_tool" copy the following files and folders to the "QUANTUM/online_quantum_tool" folder:
+  - code
+  - quantum
+  - static
+  - staticfiles
+  - templates
+  - webapp
+  - manage.py
+- Copy the content of "quantum_labelling_tool/docker" inside "QUANTUM"
 - In the "QUANTUM" folder execute by bash:
 ```bash
 docker build -t quantum_online_tool .
@@ -62,7 +71,15 @@ docker-compose up
 ```
 docker exec -it quantumtoolwebapp bash
 ```
-- See "Installation steps" and "Usage" sections
+- Fill the database with the initial information:
+```
+python manage.py migrate
+```
+- Create a super user to play with:
+```
+python manage.py createsuperuser
+```
+- See "Usage" sections
 
 ## Technology Stack
 
