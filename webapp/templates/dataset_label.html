@@ -8,10 +8,10 @@
 
 {% block content %}
 
-<script type="text/javascript" async 
-  src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script type="text/javascript" async 
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script type="text/javascript" async
+        src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type="text/javascript" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 <div class="fluid-container mb-5">
     <div class="row">
@@ -32,7 +32,9 @@
                             score, remains static in size. Surrounding it are the EHDS categories and, finally, the DQ dimensions, which vary
                             in size based on their scores.
                         </li>
-                        <li><b>Assessment Score</b>: Below the graph is a star rating and numerical score that reflect your overall dataset quality. <u>Click on</u> <i>Final Score</i> for more information on how the star rating and the final score are calculated.</li>
+                        <li><b>Assessment Score</b>: Below the graph is a star rating and numerical score that reflect your overall dataset quality. <u>Click on</u> <i>Final Score</i> for more information on how the star rating and the final score are
+                            calculated.
+                        </li>
                         <li><b>Table</b>: The table is organized to include:</li>
                         <ul>
                             <li>HDS Categories</li>
@@ -59,14 +61,14 @@
             <h2 class="text-center mt-5">Assessment score</h2>
 
 
-            <div class="mt-3 text-center">
-                <p class="display-2">
-                    {{ stars | safe }} 
+            <div class="mt-3">
+                <p class="display-2 text-center">
+                    {{ stars | safe }}
                 </p>
-                
-                <h4 style="margin-top: 20px; margin-bottom: 30px;"><a href="#" data-bs-toggle="modal" data-bs-target="#modal_finalScore">Final Score:</a> {{ score|floatformat:2 }} / 100 </h4>
+
+                <h4 style="margin-top: 20px; margin-bottom: 30px;" class="text-center"><a href="#" data-bs-toggle="modal" data-bs-target="#modal_finalScore">Final Score:</a> {{ score|floatformat:2 }} / 100 </h4>
                 <div class="modal fade" id="modal_finalScore" tabindex="-1">
-                    <div class="modal-dialog">
+                    <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h1 class="modal-title fs-5" id="exampleModalLabel">
@@ -76,9 +78,9 @@
                             </div>
                             <div class="modal-body">
                                 <p>
-                                    <b>Stars Claculation:</b>
+                                    <b>Stars Calculation:</b>
                                     <br>
-                                    <p> ★ = 25% (median) of DQ reached <br> ★★ = 45% of DQ reached <br> ★★★ = 60% of DQ reached <br> ★★★★ = 80% of DQ reached <br> ★★★★★ = 90% of DQ reached</p>
+                                <p> ★ = 25% (median) of DQ reached <br> ★★ = 45% of DQ reached <br> ★★★ = 60% of DQ reached <br> ★★★★ = 80% of DQ reached <br> ★★★★★ = 90% of DQ reached</p>
                                 </p>
                                 <hr>
                                 <p>
@@ -86,8 +88,10 @@
                                     <br>
                                 </p>
                                 <div class="text-center overflow-auto">
-                                    <p> The Total Score is a weighted average that measures the dataset's quality. Each dimension's score is based on its importance (compared to the other dimensions) multiplied by the performance of its metrics. The dimension score is normalized by the total weight of all dimensions and then summed with all the other dimension scores.</p><br>
-                                    <p> \[\text{Total Score} =\sum_{i=1}^{n=12} \frac{\text{Dimension}_i^{\text{weight}} \times \left[\left(\text{metric}_1^{\text{weight}} \times \text{metric value}_1 \right) + \left(\text{metric}_2^{\text{weight}} \times \text{metric value}_2 \right) \right]}{\text{Total Weight of Dimensions}} \times 100\]</p>
+                                    <p> The Total Score is a weighted average that measures the dataset's quality. Each dimension's score is based on its importance (compared to the other dimensions) multiplied by the performance of its metrics. The
+                                        dimension score is normalized by the total weight of all dimensions and then summed with all the other dimension scores.</p><br>
+                                    <p> \[\text{Total Score} =\sum_{i=1}^{n=12} \frac{\text{Dimension}_i^{\text{weight}} \times \left[\left(\text{metric}_1^{\text{weight}} \times \text{metric value}_1 \right) + \left(\text{metric}_2^{\text{weight}} \times
+                                        \text{metric value}_2 \right) \right]}{\text{Total Weight of Dimensions}} \times 100\]</p>
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -96,7 +100,8 @@
                         </div>
                     </div>
                 </div>
-               
+            </div>
+
             {% if information_box_needed %}
 
             <div class="row mt-5">
@@ -145,7 +150,7 @@
             <div class="row mt-3">
                 <div class="col-sm-3">
                     <b>
-                        EHDS 
+                        EHDS
                         <span class="question-mark" data-bs-toggle="tooltip" title="European Health Data Space Categories grouping different dimensions." style="cursor: pointer;">?</span>
                     </b>
                 </div>
@@ -231,7 +236,7 @@
                                         <p>
                                             <b>Respective answer in the DQ Assessment:</b>
                                             <br>
-                                            {{ metric.answer }} 
+                                            {{ metric.answer }}
                                         </p>
                                         <hr>
                                     </div>
@@ -252,7 +257,7 @@
                 </div>
             </div>
             {% endfor %}
-        {% endfor %}
+            {% endfor %}
 
             <div class="mt-5">
                 <div class="row">

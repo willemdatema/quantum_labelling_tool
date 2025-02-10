@@ -5,6 +5,7 @@ services:
     image: mariadb:10.6.14
     volumes:
       - ${QUANTUM_DATABASE_LOCATION}:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d
     restart: always
     expose:
       - 3306

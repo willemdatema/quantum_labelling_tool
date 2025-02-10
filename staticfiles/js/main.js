@@ -42,7 +42,7 @@ function validateAndHighlightFieldsByIds(elementIds, changeMadeFromButton=false)
         }
       }
       // For other types of inputs and selects, check if the value is not empty
-      else if (element.value === '-' || element.value === null) {
+      else if (element.value === '-' || element.value === null || element.value === '') {
         allFilled = false;
       }
     });
