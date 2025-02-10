@@ -67,7 +67,7 @@ docker build -t quantum_online_tool .
 ```bash
 docker-compose up
 ```
-- Access the container through the following command:
+- Access the web app container through the following command:
 ```
 docker exec -it quantumtoolwebapp bash
 ```
@@ -75,10 +75,28 @@ docker exec -it quantumtoolwebapp bash
 ```
 python manage.py migrate
 ```
-- Create a super user to play with:
+- Create a superuser to play with (root):
 ```
 python manage.py createsuperuser
 ```
+
+- Exit from the container
+```
+exit
+```
+
+- Access the database container:
+```
+docker exec -it quantumtooldatabase bash
+```
+
+- Execute the following commands to add information to the database
+```
+mysql -u root -p
+use quantum;
+source /docker-entrypoint-initdb.d/init.sql;
+```
+
 - See "Usage" sections
 
 ## Technology Stack
