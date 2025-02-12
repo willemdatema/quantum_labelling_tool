@@ -58,7 +58,7 @@ python manage.py runserver 0.0.0.0:8000
   - templates
   - webapp
   - manage.py
-- Copy the content of "quantum_labelling_tool/docker" inside "QUANTUM"
+- Copy the content of "quantum_labelling_tool/docker" inside "QUANTUM" (keep in mind that it contains an .env file, which may be hidden)
 - In the "QUANTUM" folder execute by bash:
 ```bash
 docker build -t quantum_online_tool .
