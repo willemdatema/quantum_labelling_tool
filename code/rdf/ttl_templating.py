@@ -6,12 +6,28 @@ from code.label.label import compute_scores
 from webapp.models import Dataset, Catalogue, DQMetricValue, DQMetric, DQDimension, EHDSCategory, DQAssessment
 
 
+def format_name(dimension_name: str) -> str:
+    """
+    Converts a dimension name into a format suitable for RDF.
+    - If the name has one word (e.g., "accuracy"), it remains unchanged.
+    - If the name has multiple words (e.g., "data provenance"), it is converted to "DataProvenance".
+
+    :param dimension_name: The original dimension name.
+    :return: A formatted string with no spaces and capitalized initials.
+    """
+    words = dimension_name.split()
+    return '_'.join(word.capitalize() for word in words)
+
 def template_prefix() -> str:
     return f'''@prefix dcat: <http://www.w3.org/ns/dcat#> .
 @prefix dct: <http://purl.org/dc/terms/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix dqv: <http://www.w3.org/TR/vocab-dqv/#> .
 @prefix qnt: <http://quantumproject.eu/vocab-quantum/#> .
+@prefix oa: <http://www.w3.org/ns/oa#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 '''
 
 
@@ -60,14 +76,10 @@ def template_quality_certificate(
     oa:hasTarget <{os.getenv('FDP_URL', '')}/dataset/{dataset.fdp_id or dataset.id}> ;
     dct:isPartOf <{os.getenv('FDP_URL', '')}/dataset/{dataset.fdp_id or dataset.id}> ;
     oa:hasBody qnt:{stars_text} ;
-    dct:title "Quality label 1"@en ;  # for FDP constraint purpose  
-    oa:motivatedBy dqv:qualityAssessment
+    dct:title "Quality label"@en ;    
+    oa:motivatedBy dqv:qualityAssessment ;
     dqv:inDimension 
-'''
-    for dimension in dimensions:
-        ttl += f'''        qnt:{dimension}
-'''
-    ttl += f'''    .
+    {",\n    ".join(f"qnt:{dimension}" for dimension in dimensions)} .  
     
 qnt:CustomQuantumQuality
     a skos:ConceptScheme ;
@@ -77,43 +89,42 @@ qnt:CustomQuantumQuality
     
 qnt:zero_stars
     a skos:Concept ;
-    skos:inScheme :CustomQuantumQuality ;
+    skos:inScheme qnt:CustomQuantumQuality ;
     skos:prefLabel "Zero star"@en ;
     skos:definition "Zero star corresponds to a median data quality score in the range 0%-24%"@en 
     .
     
 qnt:one_star
     a skos:Concept ;
-    skos:inScheme :CustomQuantumQuality ;
+    skos:inScheme qnt:CustomQuantumQuality ;
     skos:prefLabel "One star"@en ;
     skos:definition "One star corresponds to a median data quality score in the range 25%-44%"@en 
     .
 
 qnt:two_stars
     a skos:Concept ;
-    skos:inScheme :CustomQuantumQuality ;
+    skos:inScheme qnt:CustomQuantumQuality ;
     skos:prefLabel "Two stars"@en ;
     skos:definition "Two stars correspond to a median data quality score in the range 45%-59%"@en 
     .
 
 qnt:three_stars
     a skos:Concept ;
-    skos:inScheme :CustomQuantumQuality ;
+    skos:inScheme qnt:CustomQuantumQuality ;
     skos:prefLabel "Three stars"@en ;
     skos:definition "Three stars correspond to a median data quality score in the range 60%-79%"@en 
-
     .
 
 qnt:four_stars
     a skos:Concept ;
-    skos:inScheme :CustomQuantumQuality ;
+    skos:inScheme qnt:CustomQuantumQuality ;
     skos:prefLabel "Four stars"@en ;
     skos:definition "Four stars correspond to a median data quality score in the range 80%-89%"@en 
     .
 
 qnt:five_stars
     a skos:Concept ;
-    skos:inScheme :CustomQuantumQuality ;
+    skos:inScheme qnt:CustomQuantumQuality ;
     skos:prefLabel "Five stars"@en ;
     skos:definition "Five stars correspond to a median data quality score in the range 90%-100%"@en 
     .
@@ -123,15 +134,11 @@ qnt:five_stars
     dcterms:title "{dataset.name}" ;
     dct:hasVersion "{dataset.version}" ;
     dct:description "{dataset.description}" ;
-    dct:isPartOf <http://{os.getenv('FDP_URL', '')}/catalog/{catalogue.fdp_id or catalogue.id}>;
-    dqv:hasQualityAnnotation <{os.getenv('FDP_URL', '')}/qualityCertificate/{dataset.fdp_id or dq_assesment.id}> 
-    dqv:hasQualityMeasurement'''
-    for measurement_name in measurement_names:
-        ttl += f'''
-        qnt:{measurement_name}'''
-
-    ttl += f'''
-    .'''
+    dct:isPartOf <http://{os.getenv('FDP_URL', '')}/catalog/{catalogue.fdp_id or catalogue.id}> ;
+    dqv:hasQualityAnnotation <{os.getenv('FDP_URL', '')}/qualityCertificate/{dataset.fdp_id or dq_assesment.id}> ;
+    dqv:hasQualityMeasurement
+    {",\n    ".join(f"qnt:{measurement_name}" for measurement_name in measurement_names)} .
+    '''
     return ttl
 
 
@@ -145,8 +152,8 @@ def template_categorical_metric_value(
 qnt:{measurement_name} 
     a dqv:QualityMeasurement ;
     dqv:computedOn <{os.getenv('FDP_URL', '')}/dataset/{dataset.fdp_id or dataset.id}> ;
-    dqv:isMeasurementOf :<{metric_name}> ;
-    dqv:value "{metric_value.value}"^^xsd: integer ;
+    dqv:isMeasurementOf qnt:{metric_name} ;
+    dqv:value "{metric_value.value}"^^xsd:integer ;
     .
 '''
 
@@ -156,27 +163,26 @@ def template_metric(metric: DQMetric, metric_name: str) -> str:
 qnt:{metric_name}
     a dqv:Metric ;
     skos:definition "{metric.definition}"@en ;
-    dereferenceable."@en ;
-    dqv:expectedDataType xsd: integer ;
-    dqv:inDimension "{metric.dq_dimension.name}" 
+    dqv:expectedDataType xsd:integer ;
+    dqv:inDimension qnt:{format_name(metric.dq_dimension.name)} ;
     .
 '''
 
 
 def template_dimension(dimension: DQDimension) -> str:
     return f'''
-qnt:{dimension.name}
+qnt:{format_name(dimension.name)}
     a dqv:Dimension ;
     skos:prefLabel "{dimension.name}"@en ;
-    skos:definition "{dimension.definition}"@en ;\ 
-    dqv:inCategory <{dimension.ehds_category.name}> ;
+    skos:definition "{dimension.definition}"@en ;
+    dqv:inCategory qnt:{format_name(dimension.ehds_category.name)} ;
     .
 '''
 
 
 def template_ehds_category(category: EHDSCategory) -> str:
     return f'''
-qnt:{category.name}
+qnt:{format_name(category.name)}
     a dqv:Category ;
     skos:prefLabel "{category.name}"@en ;
     skos:definition "category_definition";
@@ -237,12 +243,12 @@ def generate_ttl_file(
         dimensions = DQDimension.objects.filter(ehds_category=category)
         for dimension in dimensions:
             dimension_filled_template = template_dimension(dimension=dimension)
-            dimension_names.append(dimension.name)
+            dimension_names.append(format_name(dimension.name))
 
             metrics = DQMetric.objects.filter(dq_dimension=dimension)
             for index, metric in enumerate(metrics):
-                metric_name = f'{dimension.name}_metric{index + 1}'
-                measurement_name = f'{dimension.name}_measurement{index + 1}'
+                metric_name = f'{format_name(dimension.name)}_metric{index + 1}'
+                measurement_name = f'{format_name(dimension.name)}_measurement{index + 1}'
                 measurement_names.append(measurement_name)
                 metric_filled_template = template_metric(metric=metric, metric_name=metric_name)
 
