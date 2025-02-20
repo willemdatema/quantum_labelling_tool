@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="css/fontawesome.min.css" rel="stylesheet"/>
+    <link href="css/brands.min.css" rel="stylesheet"/>
+    <link href="css/solid.min.css" rel="stylesheet"/>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<h2>Assessment score</h2>
+<hr>
+
+<h1 class="mt-5 display-2 text-center">
+    {{ stars | safe }}
+</h1>
+
+<h4 class="text-center">Final Score: {{ score }} / 100 </h4>
+
+<h3 class="mt-5"><b>Stars Calculation</b></h3>
+<p> ★☆☆☆☆ = 25% of DQ reached <br> ★★☆☆☆ = 45% of DQ reached <br> ★★★☆☆ = 60% of DQ reached <br> ★★★★☆ = 80% of DQ reached <br> ★★★★★ = 90% of DQ reached</p>
+
+
+<h3 class="mt-5"><b>Final Score calculation</b></h3>
+<p> The Total Score is a weighted average that measures the dataset's quality. Each dimension's score is based on its importance (compared to the other dimensions) multiplied by the performance of its metrics. The
+    dimension score is normalized by the total weight of all dimensions and then summed with all the other dimension scores.</p><br>
+<div class="text-center">
+    <img class="img-fluid" style="margin-right: 200px" src="img/formula.png"/>
+</div>
+<div class="mt-5">
+</div>
+</body>
+</html>

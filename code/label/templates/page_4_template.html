@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="css/fontawesome.min.css" rel="stylesheet"/>
+    <link href="css/brands.min.css" rel="stylesheet"/>
+    <link href="css/solid.min.css" rel="stylesheet"/>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+
+    <style>
+        /* Remove table borders */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th {
+            font-weight: bold;
+            text-align: left;
+        }
+
+        /* Add spacing between categories */
+        .category-row {
+            font-weight: bold;
+            font-size: 1.2em;
+            padding-top: 15px;
+            padding-bottom: 5px;
+        }
+
+        /* Adjust column padding */
+        td {
+            padding: 5px 10px;
+        }
+
+        /* Style headers with icons */
+        .table-header th {
+            font-weight: bold;
+            padding-bottom: 5px;
+        }
+
+        /* Optional: Add spacing between sections */
+        .section-divider {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>DQ Assessment Scores</h2>
+<hr>
+
+<table class="table">
+    <thead class="table-header">
+        <tr>
+            <th>EHDS Category</th>
+            <th>Dimension</th>
+            <th>Dim. Weight</th>
+            <th>Dim. Score</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in results %}
+        <!-- Category row as a section title -->
+        <tr>
+            <td colspan="4">{{ category.name }}</td>
+        </tr>
+
+        {% for dimension in category.dimensions %}
+        <tr>
+            <td></td> <!-- Empty EHDS column -->
+            <td>{{ dimension.name }}</td> <!-- Clickable links -->
+            <td>{{ dimension.relevance_str }} </td>
+            <td>{{ dimension.score_str }} / 100</td>
+        </tr>
+        {% endfor %}
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>
