@@ -1,10 +1,11 @@
-import pandas as pd
+import base64
+
+import plotly.express as px
+import plotly.io as pio
 from django.db.models import Sum
 
 from code.helpers.django import generate_assessment_stars
 from webapp.models import Dataset, EHDSCategory, DQDimension, DQMetric, DQMetricValue, DQCategoricalMetricCategory
-import plotly.express as px
-import plotly.io as pio
 
 
 def plot_label(dataset: Dataset):
@@ -112,6 +113,107 @@ def plot_label(dataset: Dataset):
     )
 
     return html_div
+
+
+def plot_label_as_image(dataset: Dataset):
+    elements = []
+    parents = []
+    values = []
+
+    scores, total_score = compute_scores(dataset=dataset)
+
+    stars = generate_assessment_stars(
+        total_score,
+        empty_star='\u2606',
+        filled_star='\u2605'
+    )
+
+    total_score = '{:.2f}'.format(total_score)
+
+    elements.append('QUANTUM')
+    parents.append('')
+    values.append(100)
+
+    for category in EHDSCategory.objects.all():
+        dimensions = DQDimension.objects.filter(ehds_category=category)
+
+        elements.append(category.name)
+        parents.append('QUANTUM')
+        values.append(scores[category.name]['relevance'])
+
+        for dimension in dimensions:
+            elements.append(dimension.name)
+            parents.append(category.name)
+
+            if scores[category.name]['dimensions'][dimension.name]['score'] > 0:
+                score = scores[category.name]['dimensions'][dimension.name]['score']
+            else:
+                score = 0
+            values.append(score)
+
+    data = dict(
+        elements=elements,
+        parents=parents,
+        values=values
+    )
+
+    # Create the sunburst plot
+    figure = px.sunburst(
+        data,
+        names='elements',
+        parents='parents',
+        values='values',
+        title='',
+        branchvalues='total',
+    )
+
+    figure.update_layout(
+        images=[dict(
+            source='https://pbs.twimg.com/profile_images/1757761164556021760/WK-zxj8K_400x400.jpg',
+            xref='paper', yref='paper',
+            x=0.5, y=0.55,
+            sizex=0.18, sizey=0.18,
+            xanchor='center', yanchor='middle',
+            layer='above'
+        )],
+    )
+
+    figure.add_annotation(
+        dict(
+            font=dict(
+                color='black',
+                size=15
+            ),
+            xref='paper', yref='paper',
+            x=0.5, y=0.43,
+            showarrow=False,
+            text=f'{stars}<br>{total_score}/100',
+            textangle=0,
+            xanchor='center',
+        )
+    )
+
+    figure.update_traces(
+        hovertemplate='Score: %{value:.2f}'
+    )
+
+    figure.update_layout(
+        margin=dict(
+            t=0,
+            l=0,
+            r=0,
+            b=0
+        )
+    )
+
+    # Convert figure to image in memory (PNG)
+    img_bytes = pio.to_image(figure, format="png")
+
+    # Encode image to base64
+    encoded_img = base64.b64encode(img_bytes).decode('utf-8')
+
+    # Return the base64 string
+    return f"data:image/png;base64,{encoded_img}"
 
 
 def compute_scores(dataset: Dataset) -> [dict, float]:

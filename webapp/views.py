@@ -12,7 +12,8 @@ from django.shortcuts import render, redirect
 from code.fdp.constants import FDP_DEVELOPMENT_URL
 from code.helpers.django import redirect_with_message, generate_assessment_stars
 from code.label.label import plot_label, compute_scores
-from code.rdf.ttl_templating import generate_ttl_file
+from code.label.pdf_creator import PDFCreator
+# from code.rdf.ttl_templating import generate_ttl_file
 # from code.rdf.ttl_templating import template_catalogue, fill_full_template
 from webapp.models import Dataset, DQAssessment, DQMetric, DQMetricValue, EHDSCategory, DQDimension, \
     DQCategoricalMetricCategory, UserOrganization, Catalogue, MaturityDimension, MaturityDimensionLevel, \
@@ -906,7 +907,6 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                 f'Dataset not existing!'
             )
 
-
         # Needs to add 0 score box
         information_box_needed = False
 
@@ -928,7 +928,7 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                 'score': 0,  # Initialized to 0. This will accumulate the total score for the category.
                 'all_dimensions_ok': True,
                 'id': category.id
-                
+
             })
 
             dimensions = DQDimension.objects.filter(ehds_category=category)
@@ -949,7 +949,7 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                     metric_label = f"Metric #{metric_index + 1}"
                     metric_value = DQMetricValue.objects.filter(dq_assessment=assessment, dq_metric=metric).first()
                     answer_text = "Not answered"
-                    
+
                     if metric_value:
                         # Fetch the corresponding text for the categorical value
                         answer_text = metric_value.value
@@ -965,7 +965,7 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                         'weight': int(metric.weight),
                         'score': 0,
                         'metric_label': metric_label,
-                        'answer': answer_text,	
+                        'answer': answer_text,
                         'is_metric_ok': False
                     })
 
@@ -1180,6 +1180,44 @@ def download_assessment_rdf(request: HttpRequest) -> HttpResponse:
 
         response = HttpResponse(ttl_file, content_type='application/text charset=utf-8')
         response['Content-Disposition'] = 'attachment; filename="rdf.ttl"'
+
+        return response
+    else:
+        return redirect_with_message(
+            request,
+            '/dashboard',
+            f'Wrong access!'
+        )
+
+
+def download_assessment_pdf(request: HttpRequest) -> HttpResponse:
+    if request.method == 'GET':
+        user = request.user
+        dataset_id = request.GET.get('id', None)
+
+        dataset = Dataset.objects.filter(id=dataset_id)
+        if len(dataset) == 0:
+            return redirect_with_message(
+                request,
+                '/dashboard',
+                'Dataset accessed doesn\'t exist'
+            )
+
+        organization = UserOrganization.objects.filter(user=user).first().organization
+        dataset = dataset.first()
+        catalogue = dataset.catalogue
+        assessment = DQAssessment.objects.filter(dataset=dataset).first()
+
+        pdf_creator = PDFCreator()
+        pdf_file = pdf_creator.generate_pdf(
+            dataset=dataset,
+            catalogue=catalogue,
+            assessment=assessment,
+            organization=organization
+        )
+
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="document.pdf"'
 
         return response
     else:

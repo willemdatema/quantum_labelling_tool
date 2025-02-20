@@ -31,6 +31,7 @@ urlpatterns = [
     path('dataset/label', dataset_label_view),
     path('dataset/assessment', user_dataset_assessment_view),
     path('dataset/assessment/rdf', download_assessment_rdf),
+    path('dataset/assessment/pdf', download_assessment_pdf),
     path('catalogue/create', catalogue_create_view),
     path('catalogue/modify', catalogue_modify_view),
     path('catalogue/delete', catalogue_delete_view),

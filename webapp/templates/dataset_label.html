@@ -90,7 +90,8 @@
                                 <div class="text-center overflow-auto">
                                     <p> The Total Score is a weighted average that measures the dataset's quality. Each dimension's score is based on its importance (compared to the other dimensions) multiplied by the performance of its metrics. The
                                         dimension score is normalized by the total weight of all dimensions and then summed with all the other dimension scores.</p><br>
-                                    <p> \[\text{Total Score} =\frac{\sum_{i=1}^{n=12} \text{Dimension}_i^{\text{weight}} \times \left[\sum_{j=1}^{n=2} \left(\text{metric}_j^{\text{weight}} \times \text{metric value}_j \right) \right]}{\text{Total Weight of Dimensions}} \times 100\]</p>
+                                    <p> \[\text{Total Score} =\frac{\sum_{i=1}^{n=12} \text{Dimension}_i^{\text{weight}} \times \left[\sum_{j=1}^{n=2} \left(\text{metric}_j^{\text{weight}} \times \text{metric value}_j \right) \right]}{\text{Total Weight of
+                                        Dimensions}} \times 100\]</p>
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -260,19 +261,28 @@
 
             <div class="mt-5">
                 <div class="row">
-                    <div class="col-sm-4 text-end">
-                        <a href="/dashboard">
-                            <button type="button" class="btn btn-primary">Go to DQ Dashboard</button>
-                        </a>
-                    </div>
-
-                    <div class="col-sm-4 text-center">
+                    <div class="col-sm-6 text-end">
                         <a href="/dataset/assessment/rdf?id={{ dataset_id }}">
                             <button type="button" class="btn btn-success">Download RDF label</button>
                         </a>
                     </div>
 
-                    <div class="col-sm-4 text-start">
+                    <div class="col-sm-6 text-start">
+                        <a href="/dataset/assessment/pdf?id={{ dataset_id }}">
+                            <button type="button" class="btn btn-success">Download PDF</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="row">
+                    <div class="col-sm-6 text-end">
+                        <a href="/dashboard">
+                            <button type="button" class="btn btn-primary">Go to DQ Dashboard</button>
+                        </a>
+                    </div>
+
+                    <div class="col-sm-6 text-start">
                         <a href="/dataset/assessment?id={{dataset_id}}">
                             <button type="button" class="btn btn-primary">Go to DQ assesment</button>
                         </a>
