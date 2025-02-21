@@ -12,7 +12,7 @@ from django.shortcuts import render, redirect
 from code.fdp.constants import FDP_DEVELOPMENT_URL
 from code.helpers.django import redirect_with_message, generate_assessment_stars
 from code.label.label import plot_label, compute_scores
-from code.rdf.ttl_templating import generate_ttl_file
+#from code.rdf.ttl_templating import generate_ttl_file
 # from code.rdf.ttl_templating import template_catalogue, fill_full_template
 from webapp.models import Dataset, DQAssessment, DQMetric, DQMetricValue, EHDSCategory, DQDimension, \
     DQCategoricalMetricCategory, UserOrganization, Catalogue, MaturityDimension, MaturityDimensionLevel, \
@@ -1172,13 +1172,13 @@ def download_assessment_rdf(request: HttpRequest) -> HttpResponse:
         catalogue = dataset.catalogue
         assessment = DQAssessment.objects.filter(dataset=dataset).first()
 
-        ttl_file = generate_ttl_file(
-            catalogue=catalogue,
-            dataset=dataset,
-            username=user.username
-        )
+        # ttl_file = generate_ttl_file(
+        #     catalogue=catalogue,
+        #     dataset=dataset,
+        #     username=user.username
+        # )
 
-        response = HttpResponse(ttl_file, content_type='application/text charset=utf-8')
+        response = HttpResponse(None, content_type='application/text charset=utf-8')
         response['Content-Disposition'] = 'attachment; filename="rdf.ttl"'
 
         return response
