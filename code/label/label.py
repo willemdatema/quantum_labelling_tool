@@ -12,18 +12,19 @@ import plotly.io as pio
 import plotly.express as px
 import plotly.io as pio
 
-
 import plotly.express as px
 import plotly.io as pio
+
 
 def plot_label(dataset: Dataset) -> str:
     elements = []
     parents = []
     values = []
     colors = {}
+    total_score_is_zero = False
 
     scores, total_score = compute_scores(dataset=dataset)
-    computed_score = total_score
+    total_score_is_zero = total_score == 0.0
 
     stars = generate_assessment_stars(
         total_score,
@@ -35,9 +36,9 @@ def plot_label(dataset: Dataset) -> str:
 
     # Predefined color palette for categories
     category_colors = [
-        (0, 68, 148),   # Dark Blue
-        (255, 214, 23), # Yellow
-        (64, 64, 64),   # Dark Grey
+        (0, 68, 148),  # Dark Blue
+        (255, 214, 23),  # Yellow
+        (64, 64, 64),  # Dark Grey
         (242, 151, 39)  # Orange
     ]
 
@@ -46,7 +47,10 @@ def plot_label(dataset: Dataset) -> str:
     # Root Element
     elements.append('QUANTUM')
     parents.append('')
-    values.append(computed_score)
+    if total_score_is_zero:
+        values.append(100)
+    else:
+        values.append(total_score)
     colors['QUANTUM'] = 'rgb(255, 255, 255)'  # White
 
     for category in EHDSCategory.objects.all():
@@ -54,11 +58,14 @@ def plot_label(dataset: Dataset) -> str:
 
         category_score = scores[category.name]['score']
         category_max_score = scores[category.name]['relevance']
-        category_name = f'{category.name}<br>{category_score:.2f}/{category_max_score:.2f}'
+        category_name = f'{category.name.replace(" ", "<br>")}<br>{category_score:.2f}/{category_max_score:.2f}'
 
         elements.append(category_name)
         parents.append('QUANTUM')
-        values.append(category_score)  # Use actual category score, not max score
+        if total_score_is_zero:
+            values.append(category_max_score)
+        else:
+            values.append(category_score)  # Use actual category score, not max score
 
         # Assign a color to the category
         base_color = category_colors[category_index % len(category_colors)]
@@ -75,7 +82,7 @@ def plot_label(dataset: Dataset) -> str:
             score_str = f'{score:.2f}'
             max_score_str = f'{max_score:.2f}'
 
-            dimension_name = f'{dimension.name}<br>{score_str}/{max_score_str}'
+            dimension_name = f'{dimension.name.replace(" ", "<br>")}<br>{score_str}/{max_score_str}'
             elements.append(dimension_name)
             parents.append(category_name)
 
@@ -83,7 +90,10 @@ def plot_label(dataset: Dataset) -> str:
             opacity = min(1.0, max(score / max_score, 0.3))  # Ensuring opacity is between 0.3 and 1.0
             rgba_color = f'rgba({base_color[0]},{base_color[1]},{base_color[2]},{opacity:.2f})'
 
-            values.append(score)  # Use actual score, not max score
+            if total_score_is_zero:
+                values.append(max_score)  # Use max score
+            else:
+                values.append(score)  # Use actual score, not max score
             colors[dimension_name] = rgba_color  # Assign color with opacity
 
     # Store color mapping explicitly in the dataset
@@ -115,13 +125,18 @@ def plot_label(dataset: Dataset) -> str:
         )],
     )
 
+    if total_score_is_zero:
+        score_text = 0
+    else:
+        score_text = total_score
+
     figure.add_annotation(
         dict(
             font=dict(color='black', size=15),
             xref='paper', yref='paper',
             x=0.5, y=0.43,
             showarrow=False,
-            text=f'{stars}<br>{total_score}/100',
+            text=f'{stars}<br>{score_text}/100',
             textangle=0,
             xanchor='center',
         )
