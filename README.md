@@ -30,8 +30,9 @@ Ultimately, the QUANTUM tool aims to foster **trust in health data** across Euro
 - RAM: 2 to 4 GB
 - Storage: 10 to 20 GB
 ### Software Requirements
+- Ubuntu 20.04.6 LTS or similar
 - Python 3.11
-- Docker (if used)
+- Docker 24.0.2 (if used)
 
 
 ## Installation steps
