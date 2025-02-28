@@ -11,7 +11,7 @@ from django.shortcuts import render, redirect
 
 from code.fdp.constants import FDP_DEVELOPMENT_URL
 from code.helpers.django import redirect_with_message, generate_assessment_stars
-from code.label.label import plot_label, compute_scores, compute_maturity_score
+from code.label.label import plot_maturity, compute_scores, compute_maturity_score
 from code.rdf.ttl_templating import generate_ttl_file
 # from code.rdf.ttl_templating import template_catalogue, fill_full_template
 from webapp.models import Dataset, DQAssessment, DQMetric, DQMetricValue, EHDSCategory, DQDimension, \
@@ -914,7 +914,7 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
         information_box_needed = False
 
         # Compute the label plot
-        label = plot_label(dataset)
+        label = plot_maturity(dataset)
 
         # Compute the assessment table
         dimensions_total_relevance = DQDimension.objects.aggregate(Sum('relevance'))[
@@ -1050,6 +1050,8 @@ def organization_maturity_view(request: HttpRequest) -> HttpResponse:
 
         dimensions_dictionary, matrix_score = compute_maturity_score(organization=user_organization)
 
+        maturity_plot = plot_maturity(user_organization)
+
         return render(
             request,
             'maturity_dashboard.html',
@@ -1057,7 +1059,8 @@ def organization_maturity_view(request: HttpRequest) -> HttpResponse:
                 'dimensions': dimensions_dictionary,
                 'score': matrix_score,
                 'total_score': 5 * 10,
-                'organization': user_organization.name
+                'organization': user_organization.name,
+                'plot': maturity_plot
             }
         )
     elif request.method == 'POST':
