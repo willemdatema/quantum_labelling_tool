@@ -1,10 +1,9 @@
-import pandas as pd
+import plotly.express as px
+import plotly.io as pio
 from django.db.models import Sum
 
 from code.helpers.django import generate_assessment_stars
-from webapp.models import Dataset, EHDSCategory, DQDimension, DQMetric, DQMetricValue, DQCategoricalMetricCategory
-import plotly.express as px
-import plotly.io as pio
+from webapp.models import Dataset, EHDSCategory, DQDimension, DQMetric, DQMetricValue, DQCategoricalMetricCategory, MaturityDimension, MaturityDimensionValue, MaturityDimensionLevel, Organization
 
 import plotly.express as px
 import plotly.io as pio
@@ -47,10 +46,7 @@ def plot_label(dataset: Dataset) -> str:
     # Root Element
     elements.append('QUANTUM')
     parents.append('')
-    if total_score_is_zero:
-        values.append(100)
-    else:
-        values.append(total_score)
+    values.append(100)
     colors['QUANTUM'] = 'rgb(255, 255, 255)'  # White
 
     for category in EHDSCategory.objects.all():
@@ -62,10 +58,7 @@ def plot_label(dataset: Dataset) -> str:
 
         elements.append(category_name)
         parents.append('QUANTUM')
-        if total_score_is_zero:
-            values.append(category_max_score)
-        else:
-            values.append(category_score)  # Use actual category score, not max score
+        values.append(category_max_score)
 
         # Assign a color to the category
         base_color = category_colors[category_index % len(category_colors)]
@@ -87,13 +80,10 @@ def plot_label(dataset: Dataset) -> str:
             parents.append(category_name)
 
             # Compute dimension opacity using the category's base color
-            opacity = min(1.0, max(score / max_score, 0.3))  # Ensuring opacity is between 0.3 and 1.0
+            opacity = min(1.0, max(score / max_score, 0.1))  # Ensuring opacity is between 0.3 and 1.0
             rgba_color = f'rgba({base_color[0]},{base_color[1]},{base_color[2]},{opacity:.2f})'
 
-            if total_score_is_zero:
-                values.append(max_score)  # Use max score
-            else:
-                values.append(score)  # Use actual score, not max score
+            values.append(max_score)
             colors[dimension_name] = rgba_color  # Assign color with opacity
 
     # Store color mapping explicitly in the dataset
@@ -218,3 +208,37 @@ def compute_scores(dataset: Dataset) -> [dict, float]:
             total_score += results[category.name]['dimensions'][dimension.name]['score']
 
     return results, total_score
+
+
+def compute_maturity_score(organization: Organization) -> tuple[dict, float]:
+    matrix_score = 0
+
+    dimensions = MaturityDimension.objects.all()
+    dimensions_dictionary = {}
+
+    for dimension in dimensions:
+        dimensions_dictionary[dimension.name] = {
+            'id': dimension.id,
+            'definition': dimension.definition,
+            'options': [],
+            'value': None
+        }
+
+        levels = MaturityDimensionLevel.objects.filter(maturity_dimension=dimension)
+
+        for level in levels:
+            dimensions_dictionary[dimension.name]['options'].append({
+                'value': level.value,
+                'text': level.text
+            })
+
+        dimension_value = MaturityDimensionValue.objects.filter(
+            maturity_dimension=dimension,
+            maturity_organization=organization
+        )
+
+        if len(dimension_value) == 1:
+            dimensions_dictionary[dimension.name]['value'] = dimension_value.first().maturity_dimension_level.value
+            matrix_score += dimension_value.first().maturity_dimension_level.value
+
+    return dimensions_dictionary, matrix_score
