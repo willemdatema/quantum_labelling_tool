@@ -1151,13 +1151,13 @@ def download_assessment_rdf(request: HttpRequest) -> HttpResponse:
         catalogue = dataset.catalogue
         assessment = DQAssessment.objects.filter(dataset=dataset).first()
 
-        # ttl_file = generate_ttl_file(
-        #     catalogue=catalogue,
-        #     dataset=dataset,
-        #     username=user.username
-        # )
+        ttl_file = generate_ttl_file(
+            catalogue=catalogue,
+            dataset=dataset,
+            username=user.username
+        )
 
-        response = HttpResponse(None, content_type='application/text charset=utf-8')
+        response = HttpResponse(ttl_file, content_type='application/text charset=utf-8')
         response['Content-Disposition'] = 'attachment; filename="rdf.ttl"'
 
         return response
