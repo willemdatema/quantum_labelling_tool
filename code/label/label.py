@@ -6,13 +6,25 @@ from webapp.models import Dataset, EHDSCategory, DQDimension, DQMetric, DQMetric
 import plotly.express as px
 import plotly.io as pio
 
+import plotly.express as px
+import plotly.io as pio
 
-def plot_label(dataset: Dataset):
+import plotly.express as px
+import plotly.io as pio
+
+import plotly.express as px
+import plotly.io as pio
+
+
+def plot_label(dataset: Dataset) -> str:
     elements = []
     parents = []
     values = []
+    colors = {}
+    total_score_is_zero = False
 
     scores, total_score = compute_scores(dataset=dataset)
+    total_score_is_zero = total_score == 0.0
 
     stars = generate_assessment_stars(
         total_score,
@@ -20,86 +32,120 @@ def plot_label(dataset: Dataset):
         filled_star='\u2605'
     )
 
-    total_score = '{:.2f}'.format(total_score)
+    total_score = f'{total_score:.2f}'
 
+    # Predefined color palette for categories
+    category_colors = [
+        (0, 68, 148),  # Dark Blue
+        (255, 214, 23),  # Yellow
+        (64, 64, 64),  # Dark Grey
+        (242, 151, 39)  # Orange
+    ]
+
+    category_index = 0  # Track category color assignment
+
+    # Root Element
     elements.append('QUANTUM')
     parents.append('')
-    values.append(100)
+    if total_score_is_zero:
+        values.append(100)
+    else:
+        values.append(total_score)
+    colors['QUANTUM'] = 'rgb(255, 255, 255)'  # White
 
     for category in EHDSCategory.objects.all():
         dimensions = DQDimension.objects.filter(ehds_category=category)
 
-        elements.append(category.name)
+        category_score = scores[category.name]['score']
+        category_max_score = scores[category.name]['relevance']
+        category_name = f'{category.name.replace(" ", "<br>")}<br>{category_score:.2f}/{category_max_score:.2f}'
+
+        elements.append(category_name)
         parents.append('QUANTUM')
-        values.append(scores[category.name]['relevance'])
+        if total_score_is_zero:
+            values.append(category_max_score)
+        else:
+            values.append(category_score)  # Use actual category score, not max score
+
+        # Assign a color to the category
+        base_color = category_colors[category_index % len(category_colors)]
+        category_index += 1  # Increment for the next category
+
+        # Store solid RGB color (full opacity) for the category
+        category_color = f'rgb({base_color[0]},{base_color[1]},{base_color[2]})'
+        colors[category_name] = category_color
 
         for dimension in dimensions:
-            elements.append(dimension.name)
-            parents.append(category.name)
+            score = scores[category.name]['dimensions'][dimension.name]['score']
+            max_score = scores[category.name]['dimensions'][dimension.name]['relevance'] * 100
 
-            if scores[category.name]['dimensions'][dimension.name]['score'] > 0:
-                score = scores[category.name]['dimensions'][dimension.name]['score']
+            score_str = f'{score:.2f}'
+            max_score_str = f'{max_score:.2f}'
+
+            dimension_name = f'{dimension.name.replace(" ", "<br>")}<br>{score_str}/{max_score_str}'
+            elements.append(dimension_name)
+            parents.append(category_name)
+
+            # Compute dimension opacity using the category's base color
+            opacity = min(1.0, max(score / max_score, 0.3))  # Ensuring opacity is between 0.3 and 1.0
+            rgba_color = f'rgba({base_color[0]},{base_color[1]},{base_color[2]},{opacity:.2f})'
+
+            if total_score_is_zero:
+                values.append(max_score)  # Use max score
             else:
-                score = 0
-            values.append(score)
+                values.append(score)  # Use actual score, not max score
+            colors[dimension_name] = rgba_color  # Assign color with opacity
 
+    # Store color mapping explicitly in the dataset
     data = dict(
         elements=elements,
         parents=parents,
         values=values
     )
 
-    # Create the sunburst plot
+    # Create sunburst plot
     figure = px.sunburst(
         data,
         names='elements',
         parents='parents',
         values='values',
-        title='',
         branchvalues='total',
-        # color='Score',  # Set the color to be based on the 'values'
-        # color_continuous_scale=['#FFFFFF', '#123262']  # Red to blue gradient
-        # color_continuous_scale=['#123262', '#5cc8c6', '#f6d488', '#FFFFFF']  # Red to blue gradient
+        color='elements',
+        color_discrete_map=colors  # Uses the defined RGBA colors
     )
 
     figure.update_layout(
         images=[dict(
             source='https://pbs.twimg.com/profile_images/1757761164556021760/WK-zxj8K_400x400.jpg',
-            # Replace with the URL or local path of your image
             xref='paper', yref='paper',
-            x=0.5, y=0.55,  # Positioning the image at the center
-            sizex=0.18, sizey=0.18,  # Adjust size as needed
+            x=0.5, y=0.55,
+            sizex=0.18, sizey=0.18,
             xanchor='center', yanchor='middle',
-            layer='above'  # Ensures the image is placed on top of the plot
+            layer='above'
         )],
     )
 
+    if total_score_is_zero:
+        score_text = 0
+    else:
+        score_text = total_score
+
     figure.add_annotation(
         dict(
-            font=dict(
-                color='black',
-                size=15
-            ),
+            font=dict(color='black', size=15),
             xref='paper', yref='paper',
-            x=0.5, y=0.43,  # Positioning the image at the center
+            x=0.5, y=0.43,
             showarrow=False,
-            text=f'{stars}<br>{total_score}/100',
+            text=f'{stars}<br>{score_text}/100',
             textangle=0,
             xanchor='center',
         )
     )
 
-    figure.update_traces(
-        hovertemplate='Score: %{value:.2f}'
-    )
+    figure.update_traces(hovertemplate='Score: %{value:.2f}')
 
     figure.update_layout(
-        margin=dict(
-            t=0,
-            l=0,
-            r=0,
-            b=0
-        )
+        margin=dict(t=0, l=0, r=0, b=0)
     )
 
     # Generate HTML div as a string
@@ -143,34 +189,31 @@ def compute_scores(dataset: Dataset) -> [dict, float]:
             metrics = DQMetric.objects.filter(dq_dimension=dimension)
             for metric_index, metric in enumerate(metrics):
                 results[category.name]['dimensions'][dimension.name]['metrics'][metric.definition] = {
-                    'weight': int(metric.weight),  # idk what this affects.
+                    'weight': int(metric.weight),
                     'score': 0
                 }
                 metric_score = 0
 
                 dq_metric_value = DQMetricValue.objects.filter(dq_assessment=assessment, dq_metric=metric)
-                current_value = None
 
                 # If the metric is filled then we assign the value, else it is None
                 if len(dq_metric_value) >= 1:
                     current_value = str(dq_metric_value.first().value)
-                else:
-                    pass
 
-                # For the categorical metrics we provide the possible values
-                if getattr(metric, 'dqcategoricalmetric') is not None and current_value:
-                    current_value = int(current_value)
-                    metric_categories = DQCategoricalMetricCategory.objects.filter(
-                        dq_categorical_metric=metric
-                    ).count()
+                    # For the categorical metrics we provide the possible values
+                    if getattr(metric, 'dqcategoricalmetric') is not None and current_value:
+                        current_value = int(current_value)
+                        metric_categories = DQCategoricalMetricCategory.objects.filter(
+                            dq_categorical_metric=metric
+                        ).count()
 
-                    metric_score = current_value / (metric_categories - 1)  # If 3 : 0, 1, 2 -> 0% 50% 100%
-                metric_score = metric_score * metric.weight * results[category.name]['dimensions'][dimension.name][
-                    'relevance']
-                results[category.name]['dimensions'][dimension.name]['metrics'][metric.definition][
-                    'score'] = metric_score
-                results[category.name]['dimensions'][dimension.name]['score'] += metric_score
-                results[category.name]['score'] += metric_score
+                        metric_score = current_value / (metric_categories - 1)  # If 3 : 0, 1, 2 -> 0% 50% 100%
+                    metric_score = metric_score * metric.weight * results[category.name]['dimensions'][dimension.name][
+                        'relevance']
+                    results[category.name]['dimensions'][dimension.name]['metrics'][metric.definition][
+                        'score'] = metric_score
+                    results[category.name]['dimensions'][dimension.name]['score'] += metric_score
+                    results[category.name]['score'] += metric_score
 
             total_score += results[category.name]['dimensions'][dimension.name]['score']
 
