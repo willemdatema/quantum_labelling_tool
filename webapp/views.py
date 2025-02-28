@@ -10,16 +10,19 @@ from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render, redirect
 
 from code.fdp.constants import FDP_DEVELOPMENT_URL
-from code.helpers.django import redirect_with_message, generate_assessment_stars
+from code.helpers.django import redirect_with_message, generate_assessment_stars, is_user_allowed_to_access
 from code.label.label import plot_label, compute_scores, compute_maturity_score
-from code.rdf.ttl_templating import generate_ttl_file
-# from code.rdf.ttl_templating import template_catalogue, fill_full_template
 from webapp.models import Dataset, DQAssessment, DQMetric, DQMetricValue, EHDSCategory, DQDimension, \
     DQCategoricalMetricCategory, UserOrganization, Catalogue, MaturityDimension, MaturityDimensionLevel, \
     MaturityDimensionValue
 
 
-# Create your views here.
+###########################
+#                         #
+# NO LOGIN REQUIRED VIEWS #
+#                         #
+###########################
+
 def home_view(request: HttpRequest) -> HttpResponse:
     """
     Home web page
@@ -82,6 +85,12 @@ def login_view(request: HttpRequest) -> HttpResponse:
         return redirect('/')
 
 
+###########################
+#                         #
+# LOGIN REQUIRED VIEWS #
+#                         #
+###########################
+
 @login_required
 def logout_view(request: HttpRequest) -> HttpResponse:
     """
@@ -108,8 +117,12 @@ def user_dashboard_view(request: HttpRequest) -> HttpResponse:
     :return:
     """
     if request.method == 'GET':
-        # Get the user from
         user = request.user
+
+        can_access, redirect_request = is_user_allowed_to_access(request, user)
+
+        if not can_access:
+            return redirect_request
 
         # Get the user organization and its datasets
         user_organization = UserOrganization.objects.filter(user=user)
@@ -189,6 +202,15 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'GET':
         user = request.user
         dataset_id = request.GET.get('id', None)
+
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            user,
+            dataset_id_to_check=dataset_id
+        )
+
+        if not can_access:
+            return redirect_request
 
         dataset = Dataset.objects.filter(id=dataset_id)
         if len(dataset) == 0:
@@ -284,6 +306,15 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
     elif request.method == 'POST':
         post_keys = request.POST.keys()
         dataset_id = request.POST.get('dataset', None)
+
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            request.user,
+            dataset_id_to_check=dataset_id
+        )
+
+        if not can_access:
+            return redirect_request
 
         if not dataset_id:
             # No assessment id provided
@@ -456,6 +487,15 @@ def dataset_create_view(request: HttpRequest) -> HttpResponse:
         organization = UserOrganization.objects.filter(user=user).first().organization
         catalogue = Catalogue.objects.filter(id=dataset_catalogue_id).first()
 
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            user,
+            catalogue_id_to_check=dataset_catalogue_id
+        )
+
+        if not can_access:
+            return redirect_request
+
         # Sanity check. All the needed fields are filled
         if dataset_description is None \
                 or dataset_name is None:
@@ -527,6 +567,15 @@ def dataset_modify_view(request: HttpRequest) -> HttpResponse:
         user = request.user
         dataset_id = request.GET.get('id', None)
 
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            user,
+            dataset_id_to_check=dataset_id
+        )
+
+        if not can_access:
+            return redirect_request
+
         if dataset_id is None:
             return redirect_with_message(
                 request,
@@ -564,6 +613,15 @@ def dataset_modify_view(request: HttpRequest) -> HttpResponse:
         dataset_name = request.POST.get('dataset_name', None)
         dataset_description = request.POST.get('dataset_description', None)
         dataset_URI = request.POST.get('dataset_URI', None)
+
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            user,
+            dataset_id_to_check=dataset_id
+        )
+
+        if not can_access:
+            return redirect_request
 
         # Sanity check. All the needed fields are filled
         if dataset_id is None \
@@ -618,6 +676,15 @@ def dataset_delete_view(request: HttpRequest) -> HttpResponse:
         user = request.user
         # catalogues = Catalogue.objects.filter(user=user)
         dataset_id = request.GET.get('id', None)
+
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            user,
+            dataset_id_to_check=dataset_id
+        )
+
+        if not can_access:
+            return redirect_request
 
         if not dataset_id:
             return redirect_with_message(
@@ -761,6 +828,15 @@ def catalogue_modify_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'GET':
         catalogue_id = request.GET.get('id', None)
 
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            request.user,
+            catalogue_id_to_check=catalogue_id
+        )
+
+        if not can_access:
+            return redirect_request
+
         if catalogue_id is None:
             return redirect_with_message(
                 request,
@@ -792,6 +868,15 @@ def catalogue_modify_view(request: HttpRequest) -> HttpResponse:
         catalogue_id = request.POST.get('catalogue_id', None)
         catalogue_title = request.POST.get('catalogue_title', None)
         catalogue_version = request.POST.get('catalogue_version', None)
+
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            request.user,
+            catalogue_id_to_check=catalogue_id
+        )
+
+        if not can_access:
+            return redirect_request
 
         # Sanity check. All the needed fields are filled
         if catalogue_title is None \
@@ -846,6 +931,15 @@ def catalogue_delete_view(request: HttpRequest) -> HttpResponse:
         # Get the catalogue ID from the request
         catalogue_id = request.GET.get('id', None)
 
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            request.user,
+            catalogue_id_to_check=catalogue_id
+        )
+
+        if not can_access:
+            return redirect_request
+
         # If no ID is provided, redirect to the dashboard with an error message
         if not catalogue_id:
             return redirect_with_message(
@@ -886,10 +980,20 @@ def catalogue_delete_view(request: HttpRequest) -> HttpResponse:
     return redirect('/dashboard')
 
 
+@login_required
 def dataset_label_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'GET':
         dataset_id = request.GET.get('id', None)
         user = request.user
+
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            request.user,
+            dataset_id_to_check=dataset_id
+        )
+
+        if not can_access:
+            return redirect_request
 
         if dataset_id is None:
             return redirect_with_message(
@@ -1134,10 +1238,20 @@ def organization_maturity_view(request: HttpRequest) -> HttpResponse:
         )
 
 
+@login_required
 def download_assessment_rdf(request: HttpRequest) -> HttpResponse:
     if request.method == 'GET':
         user = request.user
         dataset_id = request.GET.get('id', None)
+
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            request.user,
+            dataset_id_to_check=dataset_id
+        )
+
+        if not can_access:
+            return redirect_request
 
         dataset = Dataset.objects.filter(id=dataset_id)
         if len(dataset) == 0:
