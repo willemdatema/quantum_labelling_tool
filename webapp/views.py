@@ -11,7 +11,7 @@ from django.shortcuts import render, redirect
 
 from code.fdp.constants import FDP_DEVELOPMENT_URL
 from code.helpers.django import redirect_with_message, generate_assessment_stars
-from code.label.label import plot_label, compute_scores
+from code.label.label import plot_label, compute_scores, compute_maturity_score
 from code.rdf.ttl_templating import generate_ttl_file
 # from code.rdf.ttl_templating import template_catalogue, fill_full_template
 from webapp.models import Dataset, DQAssessment, DQMetric, DQMetricValue, EHDSCategory, DQDimension, \
@@ -889,6 +889,7 @@ def catalogue_delete_view(request: HttpRequest) -> HttpResponse:
 def dataset_label_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'GET':
         dataset_id = request.GET.get('id', None)
+        user = request.user
 
         if dataset_id is None:
             return redirect_with_message(
@@ -906,6 +907,8 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                 f'Dataset not existing!'
             )
 
+        user_organization = UserOrganization.objects.filter(user=user).first()
+        organization = user_organization.organization
 
         # Needs to add 0 score box
         information_box_needed = False
@@ -928,7 +931,7 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                 'score': 0,  # Initialized to 0. This will accumulate the total score for the category.
                 'all_dimensions_ok': True,
                 'id': category.id
-                
+
             })
 
             dimensions = DQDimension.objects.filter(ehds_category=category)
@@ -949,7 +952,7 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                     metric_label = f"Metric #{metric_index + 1}"
                     metric_value = DQMetricValue.objects.filter(dq_assessment=assessment, dq_metric=metric).first()
                     answer_text = "Not answered"
-                    
+
                     if metric_value:
                         # Fetch the corresponding text for the categorical value
                         answer_text = metric_value.value
@@ -965,7 +968,7 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                         'weight': int(metric.weight),
                         'score': 0,
                         'metric_label': metric_label,
-                        'answer': answer_text,	
+                        'answer': answer_text,
                         'is_metric_ok': False
                     })
 
@@ -1004,6 +1007,9 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
         # Drawing the stars
         stars_element = generate_assessment_stars(total_score)
 
+        # Maturity score
+        dimensions_dictionary, matrix_score = compute_maturity_score(organization=organization)
+
         return render(
             request,
             'dataset_label.html',
@@ -1013,7 +1019,8 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                 'score': total_score,
                 'stars': stars_element,
                 'dataset_id': dataset_id,
-                'information_box_needed': information_box_needed
+                'information_box_needed': information_box_needed,
+                'maturity_score': matrix_score
             }
         )
     else:
@@ -1041,35 +1048,7 @@ def organization_maturity_view(request: HttpRequest) -> HttpResponse:
 
         user_organization = user_organization.first().organization
 
-        matrix_score = 0
-
-        dimensions = MaturityDimension.objects.all()
-        dimensions_dictionary = {}
-
-        for dimension in dimensions:
-            dimensions_dictionary[dimension.name] = {
-                'id': dimension.id,
-                'definition': dimension.definition,
-                'options': [],
-                'value': None
-            }
-
-            levels = MaturityDimensionLevel.objects.filter(maturity_dimension=dimension)
-
-            for level in levels:
-                dimensions_dictionary[dimension.name]['options'].append({
-                    'value': level.value,
-                    'text': level.text
-                })
-
-            dimension_value = MaturityDimensionValue.objects.filter(
-                maturity_dimension=dimension,
-                maturity_organization=user_organization
-            )
-
-            if len(dimension_value) == 1:
-                dimensions_dictionary[dimension.name]['value'] = dimension_value.first().maturity_dimension_level.value
-                matrix_score += dimension_value.first().maturity_dimension_level.value
+        dimensions_dictionary, matrix_score = compute_maturity_score(organization=user_organization)
 
         return render(
             request,

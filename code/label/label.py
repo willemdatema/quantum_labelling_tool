@@ -1,10 +1,9 @@
-import pandas as pd
+import plotly.express as px
+import plotly.io as pio
 from django.db.models import Sum
 
 from code.helpers.django import generate_assessment_stars
-from webapp.models import Dataset, EHDSCategory, DQDimension, DQMetric, DQMetricValue, DQCategoricalMetricCategory
-import plotly.express as px
-import plotly.io as pio
+from webapp.models import Dataset, EHDSCategory, DQDimension, DQMetric, DQMetricValue, DQCategoricalMetricCategory, MaturityDimension, MaturityDimensionValue, MaturityDimensionLevel, Organization
 
 
 def plot_label(dataset: Dataset):
@@ -175,3 +174,37 @@ def compute_scores(dataset: Dataset) -> [dict, float]:
             total_score += results[category.name]['dimensions'][dimension.name]['score']
 
     return results, total_score
+
+
+def compute_maturity_score(organization: Organization) -> tuple[dict, float]:
+    matrix_score = 0
+
+    dimensions = MaturityDimension.objects.all()
+    dimensions_dictionary = {}
+
+    for dimension in dimensions:
+        dimensions_dictionary[dimension.name] = {
+            'id': dimension.id,
+            'definition': dimension.definition,
+            'options': [],
+            'value': None
+        }
+
+        levels = MaturityDimensionLevel.objects.filter(maturity_dimension=dimension)
+
+        for level in levels:
+            dimensions_dictionary[dimension.name]['options'].append({
+                'value': level.value,
+                'text': level.text
+            })
+
+        dimension_value = MaturityDimensionValue.objects.filter(
+            maturity_dimension=dimension,
+            maturity_organization=organization
+        )
+
+        if len(dimension_value) == 1:
+            dimensions_dictionary[dimension.name]['value'] = dimension_value.first().maturity_dimension_level.value
+            matrix_score += dimension_value.first().maturity_dimension_level.value
+
+    return dimensions_dictionary, matrix_score
