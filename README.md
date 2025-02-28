@@ -20,9 +20,18 @@ This tool empowers **data holders** by offering functionalities to:
 
 Ultimately, the QUANTUM tool aims to foster **trust in health data** across Europe by promoting reliable, reusable datasets that can be confidently shared within the European Health Data Space.
 
-## Requirements
-
-Python 3.11
+## System Requirements
+### Minimum Hardware Requirements
+- CPU: 1 core
+- RAM: 1 GB
+- Storage: 5 GB
+### Recommended Hardware Requirements
+- CPU: 2 to 4 cores
+- RAM: 2 to 4 GB
+- Storage: 10 to 20 GB
+### Software Requirements
+- Python 3.11
+- Docker (if used)
 
 
 ## Installation steps
