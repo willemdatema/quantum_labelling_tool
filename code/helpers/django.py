@@ -1,8 +1,11 @@
-import math
+from typing import Optional, Tuple
 
 from django.contrib import messages
-from django.http import request, HttpResponseRedirect, HttpRequest
+from django.contrib.auth.models import User
+from django.http import HttpResponseRedirect, HttpRequest
 from django.shortcuts import redirect
+
+from webapp.models import UserOrganization, Dataset, Catalogue
 
 
 def redirect_with_message(
@@ -47,3 +50,64 @@ def compute_amount_of_stars(score: float):
         return 4
 
     return 5
+
+
+def is_user_allowed_to_access(
+        request: HttpRequest,
+        user: User,
+        dataset_id_to_check: Optional[int] = None,
+        catalogue_id_to_check: Optional[int] = None
+) -> Tuple[bool, Optional[HttpResponseRedirect]]:
+    """
+    Precondition to check if user has access. Also can be checked if a dataset id or catalogue id is accessible to the user.
+
+    """
+    user_organization = UserOrganization.objects.filter(user=user)
+
+    if len(user_organization) == 0:
+        return False, redirect_with_message(
+            request,
+            '/',
+            'User not associated to an organization. Please, contact administrator: pilot@quantumproject.eu .'
+        )
+
+    if dataset_id_to_check is not None:
+        organization = user_organization.first()
+        dataset = Dataset.objects.filter(id=dataset_id_to_check)
+
+        if len(dataset) == 0:
+            return False, redirect_with_message(
+                request,
+                '/dashboard',
+                'Dataset accessed doesn\'t exist'
+            )
+
+        dataset = dataset.first()
+
+        if dataset.organization.id != organization.id:
+            return False, redirect_with_message(
+                request,
+                '/dashboard',
+                'No access permission for this dataset'
+            )
+
+    if catalogue_id_to_check is not None:
+        catalogue = Catalogue.objects.filter(id=catalogue_id_to_check)
+
+        if len(catalogue) == 0:
+            return False, redirect_with_message(
+                request,
+                '/dashboard',
+                'Catalogue accessed doesn\'t exist'
+            )
+
+        catalogue = catalogue.first()
+
+        if catalogue.user.id != user.id:
+            return False, redirect_with_message(
+                request,
+                '/dashboard',
+                'No access permission for this catalogue'
+            )
+
+    return True, None
