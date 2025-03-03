@@ -36,10 +36,7 @@ def plot_label(dataset: Dataset) -> str:
     # Root Element
     elements.append('QUANTUM')
     parents.append('')
-    if total_score_is_zero:
-        values.append(100)
-    else:
-        values.append(total_score)
+    values.append(100)
     colors['QUANTUM'] = 'rgb(255, 255, 255)'  # White
 
     for category in EHDSCategory.objects.all():
@@ -51,10 +48,7 @@ def plot_label(dataset: Dataset) -> str:
 
         elements.append(category_name)
         parents.append('QUANTUM')
-        if total_score_is_zero:
-            values.append(category_max_score)
-        else:
-            values.append(category_score)  # Use actual category score, not max score
+        values.append(category_max_score)
 
         # Assign a color to the category
         base_color = category_colors[category_index % len(category_colors)]
@@ -76,13 +70,10 @@ def plot_label(dataset: Dataset) -> str:
             parents.append(category_name)
 
             # Compute dimension opacity using the category's base color
-            opacity = min(1.0, max(score / max_score, 0.3))  # Ensuring opacity is between 0.3 and 1.0
+            opacity = min(1.0, max(score / max_score, 0.1))  # Ensuring opacity is between 0.3 and 1.0
             rgba_color = f'rgba({base_color[0]},{base_color[1]},{base_color[2]},{opacity:.2f})'
 
-            if total_score_is_zero:
-                values.append(max_score)  # Use max score
-            else:
-                values.append(score)  # Use actual score, not max score
+            values.append(max_score)
             colors[dimension_name] = rgba_color  # Assign color with opacity
 
     # Store color mapping explicitly in the dataset
@@ -242,7 +233,7 @@ def compute_maturity_score(organization: Organization) -> tuple[dict, float]:
             matrix_score += dimension_value.first().maturity_dimension_level.value
 
     return dimensions_dictionary, matrix_score
-
+  
 
 def plot_maturity(organization: Organization) -> str:
     elements = []
