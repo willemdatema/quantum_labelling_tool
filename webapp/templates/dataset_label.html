@@ -60,7 +60,6 @@
 
             <h2 class="text-center mt-5">Assessment score</h2>
 
-
             <div class="mt-3">
                 <p class="display-2 text-center">
                     {{ stars | safe }}
@@ -90,7 +89,8 @@
                                 <div class="text-center overflow-auto">
                                     <p> The Total Score is a weighted average that measures the dataset's quality. Each dimension's score is based on its importance (compared to the other dimensions) multiplied by the performance of its metrics. The
                                         dimension score is normalized by the total weight of all dimensions and then summed with all the other dimension scores.</p><br>
-                                    <p> \[\text{Total Score} =\frac{\sum_{i=1}^{n=12} \text{Dimension}_i^{\text{weight}} \times \left[\sum_{j=1}^{n=2} \left(\text{metric}_j^{\text{weight}} \times \text{metric value}_j \right) \right]}{\text{Total Weight of Dimensions}} \times 100\]</p>
+                                    <p> \[\text{Total Score} =\frac{\sum_{i=1}^{n=12} \text{Dimension}_i^{\text{weight}} \times \left[\sum_{j=1}^{n=2} \left(\text{metric}_j^{\text{weight}} \times \text{metric value}_j \right) \right]}{\text{Total Weight of
+                                        Dimensions}} \times 100\]</p>
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -99,6 +99,12 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <h2 class="text-center mt-5">Maturity score</h2>
+
+            <div class="mt-3">
+                <h4 style="margin-top: 20px; margin-bottom: 30px;" class="text-center">Score: {{ maturity_score|floatformat:2 }} / 50 </h4>
             </div>
 
             {% if information_box_needed %}

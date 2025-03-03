@@ -70,6 +70,9 @@ def template_quality_certificate(
         dq_assesment: DQAssessment,
         stars_text: str
 ) -> str:
+    dimensions_str = ",\n    ".join(f"qnt:{dimension}" for dimension in dimensions)
+    measurements_str = ",\n    ".join(f"qnt:{measurement_name}" for measurement_name in measurement_names)
+
     ttl = f'''
 <{os.getenv('FDP_URL', '')}/qualityCertificate/{dq_assesment.fdp_id or dq_assesment.id}> 
     a dqv:QualityCertificate ;
@@ -79,7 +82,7 @@ def template_quality_certificate(
     dct:title "Quality label"@en ;    
     oa:motivatedBy dqv:qualityAssessment ;
     dqv:inDimension 
-    {",\n    ".join(f"qnt:{dimension}" for dimension in dimensions)} .  
+    {dimensions_str} .  
     
 qnt:CustomQuantumQuality
     a skos:ConceptScheme ;
@@ -137,7 +140,7 @@ qnt:five_stars
     dct:isPartOf <http://{os.getenv('FDP_URL', '')}/catalog/{catalogue.fdp_id or catalogue.id}> ;
     dqv:hasQualityAnnotation <{os.getenv('FDP_URL', '')}/qualityCertificate/{dataset.fdp_id or dq_assesment.id}> ;
     dqv:hasQualityMeasurement
-    {",\n    ".join(f"qnt:{measurement_name}" for measurement_name in measurement_names)} .
+    {measurements_str} .
     '''
     return ttl
 
