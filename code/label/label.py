@@ -5,22 +5,12 @@ from django.db.models import Sum
 from code.helpers.django import generate_assessment_stars
 from webapp.models import Dataset, EHDSCategory, DQDimension, DQMetric, DQMetricValue, DQCategoricalMetricCategory, MaturityDimension, MaturityDimensionValue, MaturityDimensionLevel, Organization
 
-import plotly.express as px
-import plotly.io as pio
-
-import plotly.express as px
-import plotly.io as pio
-
-import plotly.express as px
-import plotly.io as pio
-
 
 def plot_label(dataset: Dataset) -> str:
     elements = []
     parents = []
     values = []
     colors = {}
-    total_score_is_zero = False
 
     scores, total_score = compute_scores(dataset=dataset)
     total_score_is_zero = total_score == 0.0
@@ -230,7 +220,8 @@ def compute_maturity_score(organization: Organization) -> tuple[dict, float]:
             'id': dimension.id,
             'definition': dimension.definition,
             'options': [],
-            'value': None
+            'value': None,
+            'maximum_score': 5
         }
 
         levels = MaturityDimensionLevel.objects.filter(maturity_dimension=dimension)
@@ -251,3 +242,107 @@ def compute_maturity_score(organization: Organization) -> tuple[dict, float]:
             matrix_score += dimension_value.first().maturity_dimension_level.value
 
     return dimensions_dictionary, matrix_score
+
+
+def plot_maturity(organization: Organization) -> str:
+    elements = []
+    parents = []
+    values = []
+    colors = {}
+
+    maturity_dimensions, matrix_score = compute_maturity_score(organization=organization)
+
+    # Predefined color palette for categories
+    category_colors = [
+        (0, 68, 148),  # Dark Blue
+        (255, 214, 23),  # Yellow
+        (64, 64, 64),  # Dark Grey
+        (242, 151, 39)  # Orange
+    ]
+
+    category_index = 0  # Track category color assignment
+
+    # Root Element
+    elements.append('QUANTUM')
+    parents.append('')
+    values.append(50)
+    colors['QUANTUM'] = 'rgb(255, 255, 255)'  # White
+
+    for dimension in maturity_dimensions:
+        current_dimension = maturity_dimensions[dimension]
+
+        dimension_score = current_dimension['value']
+        if not dimension_score:
+            dimension_score = 0
+        dimension_name = f'{dimension.replace(" ", "<br>")}<br>{dimension_score:.2f}/{current_dimension["maximum_score"]:.2f}'
+
+        elements.append(dimension_name)
+        parents.append('QUANTUM')
+        values.append(current_dimension["maximum_score"])
+
+        # Assign a color to the category
+        base_color = category_colors[category_index % len(category_colors)]
+        category_index += 1  # Increment for the next category
+
+        # Store solid RGB color (full opacity) for the category
+        opacity = min(1.0, max(dimension_score / current_dimension['maximum_score'], 0.3))  # Ensuring opacity is between 0.3 and 1.0
+        rgba_color = f'rgba({base_color[0]},{base_color[1]},{base_color[2]},{opacity:.2f})'
+        colors[dimension_name] = rgba_color  # Assign color with opacity
+
+    # Store color mapping explicitly in the dataset
+    data = dict(
+        elements=elements,
+        parents=parents,
+        values=values
+    )
+
+    # Create sunburst plot
+    figure = px.sunburst(
+        data,
+        names='elements',
+        parents='parents',
+        values='values',
+        branchvalues='total',
+        color='elements',
+        color_discrete_map=colors  # Uses the defined RGBA colors
+    )
+
+    figure.update_layout(
+        images=[dict(
+            source='https://pbs.twimg.com/profile_images/1757761164556021760/WK-zxj8K_400x400.jpg',
+            xref='paper', yref='paper',
+            x=0.5, y=0.55,
+            sizex=0.18, sizey=0.18,
+            xanchor='center', yanchor='middle',
+            layer='above'
+        )],
+    )
+
+    figure.add_annotation(
+        dict(
+            font=dict(color='black', size=15),
+            xref='paper', yref='paper',
+            x=0.5, y=0.43,
+            showarrow=False,
+            text=f'{matrix_score}/50',
+            textangle=0,
+            xanchor='center',
+        )
+    )
+
+    figure.update_traces(hovertemplate='Score: %{value:.2f}')
+
+    figure.update_layout(
+        margin=dict(t=0, l=0, r=0, b=0)
+    )
+
+    # Generate HTML div as a string
+    html_div = pio.to_html(
+        figure,
+        default_width='100%',
+        include_plotlyjs='cdn',
+        full_html=False,
+        config={'staticPlot': False}
+    )
+
+    return html_div
