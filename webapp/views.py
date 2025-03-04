@@ -12,7 +12,7 @@ from django.shortcuts import render, redirect
 from code.fdp.constants import FDP_DEVELOPMENT_URL
 
 from code.helpers.django import redirect_with_message, generate_assessment_stars, is_user_allowed_to_access
-from code.label.label import plot_label, compute_scores, compute_maturity_score
+from code.label.label import plot_label, compute_scores, compute_maturity_score, plot_maturity
 from code.rdf.ttl_templating import generate_ttl_file
 from webapp.models import Dataset, DQAssessment, DQMetric, DQMetricValue, EHDSCategory, DQDimension, \
     DQCategoricalMetricCategory, UserOrganization, Catalogue, MaturityDimension, MaturityDimensionLevel, \
@@ -1020,7 +1020,7 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
         information_box_needed = False
 
         # Compute the label plot
-        label = plot_maturity(dataset)
+        label = plot_label(dataset)
 
         # Compute the assessment table
         dimensions_total_relevance = DQDimension.objects.aggregate(Sum('relevance'))[

@@ -71,8 +71,10 @@ def is_user_allowed_to_access(
             'User not associated to an organization. Please, contact administrator: pilot@quantumproject.eu .'
         )
 
+    user_organization = user_organization.first()
+    organization = user_organization.organization
+
     if dataset_id_to_check is not None:
-        organization = user_organization.first()
         dataset = Dataset.objects.filter(id=dataset_id_to_check)
 
         if len(dataset) == 0:
