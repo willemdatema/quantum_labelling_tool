@@ -11,6 +11,7 @@ def plot_label(dataset: Dataset) -> str:
     parents = []
     values = []
     colors = {}
+    custom_hover_texts = []
 
     scores, total_score = compute_scores(dataset=dataset)
     total_score_is_zero = total_score == 0.0
@@ -38,6 +39,7 @@ def plot_label(dataset: Dataset) -> str:
     parents.append('')
     values.append(100)
     colors['QUANTUM'] = 'rgb(255, 255, 255)'  # White
+    custom_hover_texts.append(f'DQ&U<br>Score: {total_score}')
 
     for category in EHDSCategory.objects.all():
         dimensions = DQDimension.objects.filter(ehds_category=category)
@@ -49,6 +51,7 @@ def plot_label(dataset: Dataset) -> str:
         elements.append(category_name)
         parents.append('QUANTUM')
         values.append(category_max_score)
+        custom_hover_texts.append(category_name)
 
         # Assign a color to the category
         base_color = category_colors[category_index % len(category_colors)]
@@ -68,6 +71,7 @@ def plot_label(dataset: Dataset) -> str:
             dimension_name = f'{dimension.name.replace(" ", "<br>")}<br>{score_str}/{max_score_str}'
             elements.append(dimension_name)
             parents.append(category_name)
+            custom_hover_texts.append(dimension_name)
 
             # Compute dimension opacity using the category's base color
             opacity = min(1.0, max(score / max_score, 0.1))  # Ensuring opacity is between 0.3 and 1.0
@@ -80,7 +84,8 @@ def plot_label(dataset: Dataset) -> str:
     data = dict(
         elements=elements,
         parents=parents,
-        values=values
+        values=values,
+        hover_texts=custom_hover_texts
     )
 
     # Create sunburst plot
@@ -91,7 +96,8 @@ def plot_label(dataset: Dataset) -> str:
         values='values',
         branchvalues='total',
         color='elements',
-        color_discrete_map=colors  # Uses the defined RGBA colors
+        color_discrete_map=colors,
+        custom_data=['hover_texts']
     )
 
     figure.update_layout(
@@ -104,6 +110,8 @@ def plot_label(dataset: Dataset) -> str:
             layer='above'
         )],
     )
+
+    figure.update_traces(hovertemplate='<b>%{customdata}<extra></extra></b>')
 
     if total_score_is_zero:
         score_text = 0
@@ -121,8 +129,6 @@ def plot_label(dataset: Dataset) -> str:
             xanchor='center',
         )
     )
-
-    figure.update_traces(hovertemplate='Score: %{value:.2f}')
 
     figure.update_layout(
         margin=dict(t=0, l=0, r=0, b=0)
@@ -233,12 +239,13 @@ def compute_maturity_score(organization: Organization) -> tuple[dict, float]:
             matrix_score += dimension_value.first().maturity_dimension_level.value
 
     return dimensions_dictionary, matrix_score
-  
+
 
 def plot_maturity(organization: Organization) -> str:
     elements = []
     parents = []
     values = []
+    hover_texts = []
     colors = {}
 
     maturity_dimensions, matrix_score = compute_maturity_score(organization=organization)
@@ -257,6 +264,7 @@ def plot_maturity(organization: Organization) -> str:
     elements.append('QUANTUM')
     parents.append('')
     values.append(50)
+    hover_texts.append(f'Maturity<br>Score: {matrix_score}')
     colors['QUANTUM'] = 'rgb(255, 255, 255)'  # White
 
     for dimension in maturity_dimensions:
@@ -270,6 +278,7 @@ def plot_maturity(organization: Organization) -> str:
         elements.append(dimension_name)
         parents.append('QUANTUM')
         values.append(current_dimension["maximum_score"])
+        hover_texts.append(dimension_name)
 
         # Assign a color to the category
         base_color = category_colors[category_index % len(category_colors)]
@@ -284,7 +293,8 @@ def plot_maturity(organization: Organization) -> str:
     data = dict(
         elements=elements,
         parents=parents,
-        values=values
+        values=values,
+        hover_texts=hover_texts
     )
 
     # Create sunburst plot
@@ -295,7 +305,8 @@ def plot_maturity(organization: Organization) -> str:
         values='values',
         branchvalues='total',
         color='elements',
-        color_discrete_map=colors  # Uses the defined RGBA colors
+        color_discrete_map=colors,  # Uses the defined RGBA colors,
+        custom_data=['hover_texts']
     )
 
     figure.update_layout(
@@ -321,7 +332,7 @@ def plot_maturity(organization: Organization) -> str:
         )
     )
 
-    figure.update_traces(hovertemplate='Score: %{value:.2f}')
+    figure.update_traces(hovertemplate='<b>%{customdata}<extra></extra></b>')
 
     figure.update_layout(
         margin=dict(t=0, l=0, r=0, b=0)
