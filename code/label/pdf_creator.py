@@ -52,8 +52,6 @@ class PDFCreator:
 
         env = Environment(loader=FileSystemLoader(PDFCreator.TEMPLATES_PATH))
         for html_file in sorted(self.html_files):
-            print(html_file)
-
             template = env.get_template(f'{html_file}')
             filled_html = template.render(data)
 

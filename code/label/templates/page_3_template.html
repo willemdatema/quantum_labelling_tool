@@ -10,32 +10,31 @@
 </head>
 <body>
 <h2>
-    Comments
+    Data Quality and Utility assessment comments
 </h2>
 <hr>
 
 <p class="mt-1">
-    Measurements whose score is 0 or no value is selected
+    The following section highlights with color the metrics that either have no assigned value or received a score of 0. This allows for a clearer identification of areas where data quality or utility may be lacking, helping to pinpoint aspects that require further attention or improvement.
 </p>
 
 <small class="mt-3">
     {% for category in results %}
-    {% if not category.all_dimensions_ok %}
-    <small><b>{{ category.name }}</b></small>
+    <small><b>{{ category.category_index_str }} {{ category.name }}</b></small>
     <br>
     {% for dimension in category.dimensions %}
-    {% if not dimension.all_metrics_ok %}
-    <small>&boxv;&nbsp;&nbsp;&horbar;&nbsp;{{ dimension.name }}</small>
+    <small>{{ dimension.dimension_index_str }}&nbsp;{{ dimension.name }}</small>
     <br>
     {% for metric in dimension.metrics %}
     {% if not metric.is_metric_ok %}
-    <small>&verbar;&nbsp;&nbsp;&horbar;&horbar;&nbsp;&nbsp;{{ metric.definition }}</small>
+    <small>{{ metric.metric_label }}: {{ metric.definition }}</small>
+    {% else %}
+    <small class="bg-warning text-dark">{{ metric.metric_label }}: {{ metric.definition }}</small>
+    {% endif %}
     <br>
-    {% endif %}
     {% endfor %}
-    {% endif %}
     {% endfor %}
-    {% endif %}
     {% endfor %}
+</small>
 </body>
 </html>

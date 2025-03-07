@@ -19,7 +19,7 @@
 </style>
 <body>
 <br>
-<h1 class="text-center mt-3">QUANTUM<br>Data Quality & Utility Label</h1>
+<h1 class="text-center mt-3">QUANTUM<br>Data Quality & Utility<br>Report</h1>
 <br>
 <br>
 <br>
@@ -29,30 +29,13 @@
 </div>
 <br>
 <br>
-<br>
-<br>
-<br>
-<br>
-<div class="container">
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Organization</th>
-            <th>Catalogue</th>
-            <th>Dataset</th>
-            <th>Date</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>{{ organization.name }}</td>
-            <td>{{ catalogue.title }}</td>
-            <td>{{ dataset.name }}</td>
-            <td>{{ date }}</td>
-        </tr>
-        </tbody>
-    </table>
+<div class="text-end">
+    <p><b>{{ organization.name }}</b></p>
+    <p><b>{{ catalogue.title }}</b></p>
+    <p><b>{{ dataset.name }}</b></p>
+    <p>{{ date }}</p>
 </div>
+
 <br>
 <div style="float: right">
     <div class="small ">
