@@ -73,12 +73,12 @@
                 <li><b>Dimensions</b>: Inside each category, you will find the related dimensions. These are specific areas of data quality that need to be assessed. Click on each Dimension to access
                     detailed information and view the metrics to evaluate.
                 </li>
-                <li><b>Metrics</b>: For each dimension, you will see one or two metrics. Some allow you to select predefined options, while others may require manual input.</li>
+                <li><b>Metrics</b>: For each dimension, you will see one or two metrics. For each metric choose the appropriate level in its dropdown menu.</li>
                 <li><b>Weights and Scores</b>: Pay attention to the weighting of each dimension and metric, as they will affect the overall data quality score.</li>
                 <li><b>Assessment</b>: This is a self-assessment tool. The value chosen from the dropdown menu for each metric should be based on your own calculations and practices.
                     The system will then calculate the overall score based on your inputs.
                 </li>
-                <li><b><span style="color: rgba(255, 0, 0);">!!</span> Update</b>: Click the "Save changes" button to save your progress. <b><span style="color: rgb(255, 0, 0);">!!</span></b></li>
+                <li><b><span style="color: rgba(255, 0, 0);">!</span> Update</b>: Click the "Save changes" button to save your progress. <b><span style="color: rgb(255, 0, 0);">!</span></b></li>
                 <li><b>RDF Certificate</b>: At any point in time you can click on the "Download RDF" button to save locally your assessment in RDF (ttl) format. It will show the current state of the assessment.
                 </li>
                 <li><b>Privacy</b>: This system does not utilize or require access to your data, and it operates in full compliance with GDPR regulations.</li>
@@ -95,7 +95,7 @@
             Within a Metric:
             <ul style="margin-bottom: 0;">
                 <li><b>Weight</b>: The relative importance of each metric within a dimension, used to calculate the dimension's final score.</li>
-                <li><b>Measurement Approach & Suggested Formula</b>: Represent suggested methods and formulas for measuring the metric (not mandatory).</li>
+                <li><b>Recommended Measurement Approach</b>: Represent suggested methods and formulas for measuring the metric (not mandatory).</li>
             </ul>
         </div>
     </div>
@@ -302,7 +302,7 @@
     </div>
     <div class="col-sm-4 text-center">
         <a href="/dataset/assessment/rdf?id={{ dataset_id }}">
-            <button id="go_download" type="button" class="btn btn-secondary">Download RDF</button>
+            <button id="go_download" type="button" class="btn btn-success">Download RDF</button>
         </a>
     </div>
     <div class="col-sm-4 text-start">

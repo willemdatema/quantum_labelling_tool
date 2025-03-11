@@ -16,10 +16,13 @@
         <hr>
         <div>
             <h5>Maturity Score</h5>
-            <p style="color: grey;"> <i>Maturity is a feature at the data holder level. It refers to the level of automation of data and data quality management procedures.</i></p>
+            <p style="color: grey;"><i>Maturity is a feature at the data holder level. It refers to the level of automation of data and data quality management procedures.</i></p>
             <p style="margin-top: 2%;">
                 Current score: <b class="maturity-level"> {{ score }}</b> <span style="font-size: 20px;"> / {{ total_score }}</span>
             </p>
+            <div class="text-center">
+                {{ plot | safe }}
+            </div>
         </div>
 
         <h4 style="margin-top: 3%;">Maturity Assessment</h4>
@@ -34,8 +37,8 @@
             <div class="d-flex justify-content-center">
                 <div class="card card-body" style="max-width: 1000px;">
                     <h5 class="text-center mb-3"><b>Follow the instructions below to evaluate your dataset</b></h5>
-                    <p  class="text-center" style="color: grey;"><i>The maturity model in the QUANTUM project assesses data holders across ten defined dimensions, each with maturity levels from 1 to
-                         5, representing a spectrum from initial to optimized processes. Each dimension's maturity is scored from 1 to 5, yielding an overall score between 10 and 50.</i></p>
+                    <p class="text-center" style="color: grey;"><i>The maturity model in the QUANTUM project assesses data holders across ten defined dimensions, each with maturity levels from 1 to
+                        5, representing a spectrum from initial to optimized processes. Each dimension's maturity is scored from 1 to 5, yielding an overall score between 10 and 50.</i></p>
                     <ul>
                         <li><b>Dimensions</b>: Click on each dimension to expand and view its values.</li>
                         <li><b>Assessment</b>: Every dimension contains a level of accomplishment, which is can be selected from a list</li>
