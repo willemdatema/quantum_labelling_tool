@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="css/fontawesome.min.css" rel="stylesheet"/>
+    <link href="css/brands.min.css" rel="stylesheet"/>
+    <link href="css/solid.min.css" rel="stylesheet"/>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<h2>Data Quality & Utility assessment score</h2>
+<hr>
+<p>
+The following score has been calculated based on the QUANTUM-specified DQ&U (Data Quality and Utility) dimensions.
+</p>
+
+<h1 class="mt-5 display-2 text-center">
+    {{ stars | safe }}
+</h1>
+
+<h4 class="text-center">Final score: {{ score }} / 100 </h4>
+
+<h3 class="mt-5"><b>Stars Calculation</b></h3>
+<p> ★☆☆☆☆ = 25% of DQ&U reached <br> ★★☆☆☆ = 45% of DQ&U reached <br> ★★★☆☆ = 60% of DQ&U reached <br> ★★★★☆ = 80% of DQ&U reached <br> ★★★★★ = 90% of DQ&U reached</p>
+
+
+<h3 class="mt-5"><b>Final score calculation</b></h3>
+<p> The Total Score is a weighted average that measures the dataset's DQ&U. Each dimension's score is based on its importance (compared to the other dimensions) multiplied by the performance of its metrics. The
+    dimension score is normalized by the total weight of all dimensions and then summed with all the other dimension scores.</p><br>
+<div class="text-center">
+    <img class="img-fluid" style="margin-right: 200px" src="img/formula.png"/>
+</div>
+<div class="mt-5">
+</div>
+</body>
+</html>

@@ -11,9 +11,11 @@ from django.shortcuts import render, redirect
 
 from code.fdp.constants import FDP_DEVELOPMENT_URL
 
+from code.label.pdf_creator import PDFCreator
 from code.helpers.django import redirect_with_message, generate_assessment_stars, is_user_allowed_to_access
 from code.label.label import plot_label, compute_scores, compute_maturity_score, plot_maturity
 from code.rdf.ttl_templating import generate_ttl_file
+
 from webapp.models import Dataset, DQAssessment, DQMetric, DQMetricValue, EHDSCategory, DQDimension, \
     DQCategoricalMetricCategory, UserOrganization, Catalogue, MaturityDimension, MaturityDimensionLevel, \
     MaturityDimensionValue
@@ -1278,6 +1280,44 @@ def download_assessment_rdf(request: HttpRequest) -> HttpResponse:
 
         response = HttpResponse(ttl_file, content_type='application/text charset=utf-8')
         response['Content-Disposition'] = 'attachment; filename="rdf.ttl"'
+
+        return response
+    else:
+        return redirect_with_message(
+            request,
+            '/dashboard',
+            f'Wrong access!'
+        )
+
+
+def download_assessment_pdf(request: HttpRequest) -> HttpResponse:
+    if request.method == 'GET':
+        user = request.user
+        dataset_id = request.GET.get('id', None)
+
+        dataset = Dataset.objects.filter(id=dataset_id)
+        if len(dataset) == 0:
+            return redirect_with_message(
+                request,
+                '/dashboard',
+                'Dataset accessed doesn\'t exist'
+            )
+
+        organization = UserOrganization.objects.filter(user=user).first().organization
+        dataset = dataset.first()
+        catalogue = dataset.catalogue
+        assessment = DQAssessment.objects.filter(dataset=dataset).first()
+
+        pdf_creator = PDFCreator()
+        pdf_file = pdf_creator.generate_pdf(
+            dataset=dataset,
+            catalogue=catalogue,
+            assessment=assessment,
+            organization=organization
+        )
+
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="document.pdf"'
 
         return response
     else:

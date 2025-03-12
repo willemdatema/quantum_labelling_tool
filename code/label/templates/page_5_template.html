@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="css/fontawesome.min.css" rel="stylesheet"/>
+    <link href="css/brands.min.css" rel="stylesheet"/>
+    <link href="css/solid.min.css" rel="stylesheet"/>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+
+    <style>
+        /* Remove table borders */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th {
+            font-weight: bold;
+            text-align: left;
+        }
+
+        /* Add spacing between categories */
+        .category-row {
+            font-weight: bold;
+            font-size: 1.2em;
+            padding-top: 15px;
+            padding-bottom: 5px;
+        }
+
+        /* Adjust column padding */
+        td {
+            padding: 5px 10px;
+        }
+
+        /* Style headers with icons */
+        .table-header th {
+            font-weight: bold;
+            padding-bottom: 5px;
+        }
+
+        /* Optional: Add spacing between sections */
+        .section-divider {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Data Quality and Utility assessment detailed scores</h2>
+<hr>
+<p>
+    This section provides a breakdown of the Data Quality and Utility Assessment Scores, offering a detailed evaluation of each dimension and its corresponding metrics. The scores reflect key aspects of data quality, with each metric contributing to an overall
+    assessment based on its assigned weight.
+</p>
+
+
+{% for category in results %}
+<!-- Category row as a section title -->
+<h3><b>{{ category.category_index_str }} {{ category.name }}</b></h3>
+{% for dimension in category.dimensions %}
+<p class="mt-3"><b>{{ dimension.dimension_index_str }} {{ dimension.name }}</b></p>
+<p>{{ dimension.definition }} </p>
+<p>Dimension relevance: {{ dimension.relevance_str }} </p>
+<p>Dimension score: {{ dimension.score_str }}</p>
+
+{% for metric in dimension.metrics %}
+<div class="card card-body mb-3">
+    <span>{{ metric.metric_label }}</span>
+    <hr class="mt-1">
+    <p>{{ metric.definition }}</p>
+    <p>Metric Weight: {{ metric.weight_str }}</p>
+    <p>Metric Score: {{ metric.score_str }}</p>
+    <p>Respective answer in the DQ&U Assessment: {{ metric.answer }}</p>
+</div>
+{% endfor %}
+{% endfor %}
+{% endfor %}
+
+</body>
+</html>

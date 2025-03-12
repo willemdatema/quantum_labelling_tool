@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="css/fontawesome.min.css" rel="stylesheet"/>
+    <link href="css/brands.min.css" rel="stylesheet"/>
+    <link href="css/solid.min.css" rel="stylesheet"/>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<h2>
+    Data Quality and Utility assessment comments
+</h2>
+<hr>
+
+<p class="mt-1">
+    The following section highlights with color the metrics that either have no assigned value or received a score of 0. This allows for a clearer identification of areas where data quality or utility may be lacking, helping to pinpoint aspects that require further attention or improvement.
+</p>
+
+<small class="mt-3">
+    {% for category in results %}
+    <small><b>{{ category.category_index_str }} {{ category.name }}</b></small>
+    <br>
+    {% for dimension in category.dimensions %}
+    <small>{{ dimension.dimension_index_str }}&nbsp;{{ dimension.name }}</small>
+    <br>
+    {% for metric in dimension.metrics %}
+    {% if not metric.is_metric_ok %}
+    <small>{{ metric.metric_label }}: {{ metric.definition }}</small>
+    {% else %}
+    <small class="bg-warning text-dark">{{ metric.metric_label }}: {{ metric.definition }}</small>
+    {% endif %}
+    <br>
+    {% endfor %}
+    {% endfor %}
+    {% endfor %}
+</small>
+</body>
+</html>
