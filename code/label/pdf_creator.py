@@ -8,7 +8,7 @@ from weasyprint import HTML
 from jinja2 import Environment, FileSystemLoader
 
 from code.helpers.django import generate_assessment_stars
-from code.label.label import plot_label, plot_label_as_image, compute_scores
+from code.label.label import plot_label, compute_scores
 from webapp.models import Dataset, Catalogue, DQAssessment, Organization, DQMetric, DQDimension, EHDSCategory, DQMetricValue, DQCategoricalMetricCategory
 
 
@@ -40,7 +40,7 @@ class PDFCreator:
 
         data = {
             'stars': generate_assessment_stars(score),
-            'label': plot_label_as_image(dataset),
+            'label': plot_label(dataset, output_type='img'),
             'score': score,
             'dataset': dataset,
             'catalogue': catalogue,
