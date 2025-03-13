@@ -10,17 +10,23 @@ from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render, redirect
 
 from code.fdp.constants import FDP_DEVELOPMENT_URL
-from code.helpers.django import redirect_with_message, generate_assessment_stars
-from code.label.label import plot_label, compute_scores
+
 from code.label.pdf_creator import PDFCreator
-# from code.rdf.ttl_templating import generate_ttl_file
-# from code.rdf.ttl_templating import template_catalogue, fill_full_template
+from code.helpers.django import redirect_with_message, generate_assessment_stars, is_user_allowed_to_access
+from code.label.label import plot_label, compute_scores, compute_maturity_score, plot_maturity
+from code.rdf.ttl_templating import generate_ttl_file
+
 from webapp.models import Dataset, DQAssessment, DQMetric, DQMetricValue, EHDSCategory, DQDimension, \
     DQCategoricalMetricCategory, UserOrganization, Catalogue, MaturityDimension, MaturityDimensionLevel, \
     MaturityDimensionValue
 
 
-# Create your views here.
+###########################
+#                         #
+# NO LOGIN REQUIRED VIEWS #
+#                         #
+###########################
+
 def home_view(request: HttpRequest) -> HttpResponse:
     """
     Home web page
@@ -83,6 +89,12 @@ def login_view(request: HttpRequest) -> HttpResponse:
         return redirect('/')
 
 
+###########################
+#                         #
+# LOGIN REQUIRED VIEWS #
+#                         #
+###########################
+
 @login_required
 def logout_view(request: HttpRequest) -> HttpResponse:
     """
@@ -109,8 +121,12 @@ def user_dashboard_view(request: HttpRequest) -> HttpResponse:
     :return:
     """
     if request.method == 'GET':
-        # Get the user from
         user = request.user
+
+        can_access, redirect_request = is_user_allowed_to_access(request, user)
+
+        if not can_access:
+            return redirect_request
 
         # Get the user organization and its datasets
         user_organization = UserOrganization.objects.filter(user=user)
@@ -190,6 +206,15 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'GET':
         user = request.user
         dataset_id = request.GET.get('id', None)
+
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            user,
+            dataset_id_to_check=dataset_id
+        )
+
+        if not can_access:
+            return redirect_request
 
         dataset = Dataset.objects.filter(id=dataset_id)
         if len(dataset) == 0:
@@ -285,6 +310,15 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
     elif request.method == 'POST':
         post_keys = request.POST.keys()
         dataset_id = request.POST.get('dataset', None)
+
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            request.user,
+            dataset_id_to_check=dataset_id
+        )
+
+        if not can_access:
+            return redirect_request
 
         if not dataset_id:
             # No assessment id provided
@@ -457,6 +491,15 @@ def dataset_create_view(request: HttpRequest) -> HttpResponse:
         organization = UserOrganization.objects.filter(user=user).first().organization
         catalogue = Catalogue.objects.filter(id=dataset_catalogue_id).first()
 
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            user,
+            catalogue_id_to_check=dataset_catalogue_id
+        )
+
+        if not can_access:
+            return redirect_request
+
         # Sanity check. All the needed fields are filled
         if dataset_description is None \
                 or dataset_name is None:
@@ -528,6 +571,15 @@ def dataset_modify_view(request: HttpRequest) -> HttpResponse:
         user = request.user
         dataset_id = request.GET.get('id', None)
 
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            user,
+            dataset_id_to_check=dataset_id
+        )
+
+        if not can_access:
+            return redirect_request
+
         if dataset_id is None:
             return redirect_with_message(
                 request,
@@ -565,6 +617,15 @@ def dataset_modify_view(request: HttpRequest) -> HttpResponse:
         dataset_name = request.POST.get('dataset_name', None)
         dataset_description = request.POST.get('dataset_description', None)
         dataset_URI = request.POST.get('dataset_URI', None)
+
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            user,
+            dataset_id_to_check=dataset_id
+        )
+
+        if not can_access:
+            return redirect_request
 
         # Sanity check. All the needed fields are filled
         if dataset_id is None \
@@ -619,6 +680,15 @@ def dataset_delete_view(request: HttpRequest) -> HttpResponse:
         user = request.user
         # catalogues = Catalogue.objects.filter(user=user)
         dataset_id = request.GET.get('id', None)
+
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            user,
+            dataset_id_to_check=dataset_id
+        )
+
+        if not can_access:
+            return redirect_request
 
         if not dataset_id:
             return redirect_with_message(
@@ -762,6 +832,15 @@ def catalogue_modify_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'GET':
         catalogue_id = request.GET.get('id', None)
 
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            request.user,
+            catalogue_id_to_check=catalogue_id
+        )
+
+        if not can_access:
+            return redirect_request
+
         if catalogue_id is None:
             return redirect_with_message(
                 request,
@@ -793,6 +872,15 @@ def catalogue_modify_view(request: HttpRequest) -> HttpResponse:
         catalogue_id = request.POST.get('catalogue_id', None)
         catalogue_title = request.POST.get('catalogue_title', None)
         catalogue_version = request.POST.get('catalogue_version', None)
+
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            request.user,
+            catalogue_id_to_check=catalogue_id
+        )
+
+        if not can_access:
+            return redirect_request
 
         # Sanity check. All the needed fields are filled
         if catalogue_title is None \
@@ -847,6 +935,15 @@ def catalogue_delete_view(request: HttpRequest) -> HttpResponse:
         # Get the catalogue ID from the request
         catalogue_id = request.GET.get('id', None)
 
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            request.user,
+            catalogue_id_to_check=catalogue_id
+        )
+
+        if not can_access:
+            return redirect_request
+
         # If no ID is provided, redirect to the dashboard with an error message
         if not catalogue_id:
             return redirect_with_message(
@@ -887,9 +984,20 @@ def catalogue_delete_view(request: HttpRequest) -> HttpResponse:
     return redirect('/dashboard')
 
 
+@login_required
 def dataset_label_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'GET':
         dataset_id = request.GET.get('id', None)
+        user = request.user
+
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            request.user,
+            dataset_id_to_check=dataset_id
+        )
+
+        if not can_access:
+            return redirect_request
 
         if dataset_id is None:
             return redirect_with_message(
@@ -906,6 +1014,9 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                 '/dashboard',
                 f'Dataset not existing!'
             )
+
+        user_organization = UserOrganization.objects.filter(user=user).first()
+        organization = user_organization.organization
 
         # Needs to add 0 score box
         information_box_needed = False
@@ -1004,6 +1115,9 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
         # Drawing the stars
         stars_element = generate_assessment_stars(total_score)
 
+        # Maturity score
+        dimensions_dictionary, matrix_score = compute_maturity_score(organization=organization)
+
         return render(
             request,
             'dataset_label.html',
@@ -1013,7 +1127,8 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                 'score': total_score,
                 'stars': stars_element,
                 'dataset_id': dataset_id,
-                'information_box_needed': information_box_needed
+                'information_box_needed': information_box_needed,
+                'maturity_score': matrix_score
             }
         )
     else:
@@ -1041,35 +1156,9 @@ def organization_maturity_view(request: HttpRequest) -> HttpResponse:
 
         user_organization = user_organization.first().organization
 
-        matrix_score = 0
+        dimensions_dictionary, matrix_score = compute_maturity_score(organization=user_organization)
 
-        dimensions = MaturityDimension.objects.all()
-        dimensions_dictionary = {}
-
-        for dimension in dimensions:
-            dimensions_dictionary[dimension.name] = {
-                'id': dimension.id,
-                'definition': dimension.definition,
-                'options': [],
-                'value': None
-            }
-
-            levels = MaturityDimensionLevel.objects.filter(maturity_dimension=dimension)
-
-            for level in levels:
-                dimensions_dictionary[dimension.name]['options'].append({
-                    'value': level.value,
-                    'text': level.text
-                })
-
-            dimension_value = MaturityDimensionValue.objects.filter(
-                maturity_dimension=dimension,
-                maturity_organization=user_organization
-            )
-
-            if len(dimension_value) == 1:
-                dimensions_dictionary[dimension.name]['value'] = dimension_value.first().maturity_dimension_level.value
-                matrix_score += dimension_value.first().maturity_dimension_level.value
+        maturity_plot = plot_maturity(user_organization)
 
         return render(
             request,
@@ -1078,7 +1167,8 @@ def organization_maturity_view(request: HttpRequest) -> HttpResponse:
                 'dimensions': dimensions_dictionary,
                 'score': matrix_score,
                 'total_score': 5 * 10,
-                'organization': user_organization.name
+                'organization': user_organization.name,
+                'plot': maturity_plot
             }
         )
     elif request.method == 'POST':
@@ -1155,10 +1245,20 @@ def organization_maturity_view(request: HttpRequest) -> HttpResponse:
         )
 
 
+@login_required
 def download_assessment_rdf(request: HttpRequest) -> HttpResponse:
     if request.method == 'GET':
         user = request.user
         dataset_id = request.GET.get('id', None)
+
+        can_access, redirect_request = is_user_allowed_to_access(
+            request,
+            request.user,
+            dataset_id_to_check=dataset_id
+        )
+
+        if not can_access:
+            return redirect_request
 
         dataset = Dataset.objects.filter(id=dataset_id)
         if len(dataset) == 0:
