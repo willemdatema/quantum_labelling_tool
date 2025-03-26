@@ -347,11 +347,17 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
                 if type(metric_report_url) is str and metric_report_url.strip() == '':
                     metric_report_url = None
 
-                # If metric value is not "empty"
-                if metric_value != '-' and metric_value != '':
+                # If metric value is "empty" is for deleting it
+                if metric_value == '-':
+                    metrics.append(
+                        (metric_key, None, None)
+                    )
+                # Update a current metric value
+                elif metric_value != '':
                     metrics.append(
                         (metric_key, metric_value, metric_report_url)
                     )
+
         assessment = dataset.dq_assessment
 
         # We create or update the filled values
@@ -378,6 +384,16 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
                 'dq_metric': dq_metric,
                 'dq_assessment': assessment,
             }
+
+            # Value to None means to remove it
+            if value is None:
+                current_dq_value = DQMetricValue.objects.filter(**lookup_fields)
+
+                if current_dq_value:
+                    current_dq_value.delete()
+                    changes.append(f'{dq_metric.dq_dimension.name} updated')
+
+                continue
 
             if validated_report_url:
                 update_fields = {
