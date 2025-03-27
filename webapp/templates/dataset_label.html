@@ -28,11 +28,11 @@
                 <div class="card card-body" style="max-width: 1000px;">
                     <ul style="margin-bottom: 0%;">
                         <li><b>Label Visualization</b>: The circular graph displays your dataset's performance across categories. The size of
-                            each slice indicates the score: larger slices represent higher scores. The inner circle, showing the overall quality
-                            score, remains static in size. Surrounding it are the EHDS categories and, finally, the DQ dimensions, which vary
+                            each slice indicates the score: larger slices represent higher scores. The inner circle, showing the overall quality and utility
+                            score, remains static in size. Surrounding it are the EHDS categories and, finally, the DQ&U dimensions, which vary
                             in size based on their scores.
                         </li>
-                        <li><b>Assessment Score</b>: Below the graph is a star rating and numerical score that reflect your overall dataset quality. <u>Click on</u> "<i>Total Q&U Score</i>" for more information on how the star rating and the final score are
+                        <li><b>Assessment Score</b>: Below the graph is a star rating and numerical score that reflect your overall dataset quality and utility. <u>Click on</u> "<i>Total Q&U Score</i>" for more information on how the star rating and the final score are
                             calculated.
                         </li>
                         <li><b>Table</b>: The table is organized to include:</li>
@@ -41,11 +41,11 @@
                             <li>Dimension: name, weight, and score.</li>
                             <li><u>Click on</u>: the dimension name for more information on the metrics that measure it.</li>
                         </ul>
-                        <li><b>Categories</b>: The EHDS Categories represent broad areas of data quality. Each category contains one or more dimensions.</li>
+                        <li><b>Categories</b>: The EHDS Categories represent broad areas of data quality and utility. Each category contains one or more dimensions.</li>
                         <li><b>Dimensions</b>: For each dimension, the name, the weight relative to other dimensions for calculating the overall score, and the respective
                             score are displayed. Click on the dimension name for more information on the metrics that measure it.
                         </li>
-                        <li><b>Download RDF</b>: Once reviewed, click "<i>Download RDF label</i>" to save the quality assessment in RDF format.</li>
+                        <li><b>Download RDF</b>: Once reviewed, click "<i>Download RDF label</i>" to save the quality and utility assessment in RDF format.</li>
                     </ul>
                 </div>
             </div>
@@ -88,7 +88,7 @@
                                     <br>
                                 </p>
                                 <div class="text-center overflow-auto">
-                                    <p> The Total Score is a weighted average that measures the dataset's quality. Each dimension's score is based on its importance (compared to the other dimensions) multiplied by the performance of its metrics. The
+                                    <p> The Total Score is a weighted average that measures the dataset's quality and utility. Each dimension's score is based on its importance (compared to the other dimensions) multiplied by the performance of its metrics. The
                                         dimension score is normalized by the total weight of all dimensions and then summed with all the other dimension scores.</p><br>
                                     <p> \[\text{Total Score} =\frac{\sum_{i=1}^{n=12} \text{Dimension}_i^{\text{weight}} \times \left[\sum_{j=1}^{n=2} \left(\text{metric}_j^{\text{weight}} \times \text{metric value}_j \right) \right]}{\text{Total Weight of
                                         Dimensions}} \times 100\]</p>
@@ -165,13 +165,13 @@
                 <div class="col-sm-3">
                     <b>
                         Dim. weight
-                        <span class="question-mark" data-bs-toggle="tooltip" title="This represents the weight of the dimension in the overall quality score calculation." style="cursor: pointer;">?</span>
+                        <span class="question-mark" data-bs-toggle="tooltip" title="This represents the weight of the dimension in the overall quality and utility score calculation." style="cursor: pointer;">?</span>
                     </b>
                 </div>
                 <div class="col-sm-3">
                     <b>
                         Dim. score
-                        <span class="question-mark" data-bs-toggle="tooltip" title="This represents the score of the dimension in the overall quality score calculation." style="cursor: pointer;">?</span>
+                        <span class="question-mark" data-bs-toggle="tooltip" title="This represents the score of the dimension in the overall quality and utility score calculation." style="cursor: pointer;">?</span>
                     </b>
                 </div>
             </div>
@@ -236,7 +236,7 @@
                                             {{ metric.score|floatformat:2 }}
                                         </p>
                                         <p>
-                                            <b>Respective answer in the DQ Assessment:</b>
+                                            <b>Respective answer in the DQ&U Assessment:</b>
                                             <br>
                                             {{ metric.answer }}
                                         </p>
@@ -280,13 +280,13 @@
                 <div class="row">
                     <div class="col-sm-6 text-end">
                         <a href="/dashboard">
-                            <button type="button" class="btn btn-primary">Go to DQ Dashboard</button>
+                            <button type="button" class="btn btn-primary">Go to DQ&U Dashboard</button>
                         </a>
                     </div>
 
                     <div class="col-sm-6 text-start">
                         <a href="/dataset/assessment?id={{dataset_id}}">
-                            <button type="button" class="btn btn-primary">Go to DQ assesment</button>
+                            <button type="button" class="btn btn-primary">Go to DQ&U assesment</button>
                         </a>
                     </div>
                 </div>
