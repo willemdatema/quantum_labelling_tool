@@ -1204,8 +1204,13 @@ def organization_maturity_view(request: HttpRequest) -> HttpResponse:
                 else:
                     continue
 
+                # If metric value is -, to remove if exists
+                if dimension_value == '-':
+                    dimensions.append(
+                        (dimension_key, None)
+                    )
                 # If metric value is not "empty"
-                if dimension_value != '-' and dimension_value != '':
+                elif dimension_value != '':
                     dimensions.append(
                         (dimension_key, dimension_value)
                     )
@@ -1214,6 +1219,21 @@ def organization_maturity_view(request: HttpRequest) -> HttpResponse:
         changes = []
         for dimension in dimensions:
             maturity_dimension = MaturityDimension.objects.get(id=dimension[0])
+
+            # If value is '-' remove if exists
+            if not dimension[1]:
+                lookup_fields = {
+                    'maturity_dimension': maturity_dimension,
+                }
+
+                previous_maturity_dimension_level = MaturityDimensionValue.objects.filter(**lookup_fields)
+
+                if len(previous_maturity_dimension_level) > 0:
+                    previous_maturity_dimension_level[0].delete()
+
+                changes.append(maturity_dimension.name)
+
+                continue
 
             value = int(dimension[1])
 
