@@ -56,11 +56,11 @@
 </div>
 <br style="margin-bottom: 30px;">
 
-<h2 class="text-center mt-4">Quality Assessment</h2>
+<h2 class="text-center mt-4">Quality & Utility Assessment</h2>
 <hr class="mt-0">
 <div class="d-flex justify-content-center mt-3">
     <button class="btn btn-secondary mb-1" type="button" data-bs-toggle="collapse" data-bs-target="#helpSection" aria-expanded="false" aria-controls="helpSection">
-        How to Use the Quality Assessment?
+        How to Use the Quality & Utility Assessment?
     </button>
 </div>
 
@@ -70,11 +70,11 @@
             <h5 class="text-center mb-3"><b>Follow the instructions below to evaluate your dataset</b></h5>
             <ul>
                 <li><b>Categories</b>: Click on each EHDS category to expand and view its dimensions.</li>
-                <li><b>Dimensions</b>: Inside each category, you will find the related dimensions. These are specific areas of data quality that need to be assessed. Click on each Dimension to access
+                <li><b>Dimensions</b>: Inside each category, you will find the related dimensions. These are specific areas of data quality and utility that need to be assessed. Click on each Dimension to access
                     detailed information and view the metrics to evaluate.
                 </li>
                 <li><b>Metrics</b>: For each dimension, you will see one or two metrics. For each metric choose the appropriate level in its dropdown menu.</li>
-                <li><b>Weights and Scores</b>: Pay attention to the weighting of each dimension and metric, as they will affect the overall data quality score.</li>
+                <li><b>Weights and Scores</b>: Pay attention to the weighting of each dimension and metric, as they will affect the overall data quality and utility score.</li>
                 <li><b>Assessment</b>: This is a self-assessment tool. The value chosen from the dropdown menu for each metric should be based on your own calculations and practices.
                     The system will then calculate the overall score based on your inputs.
                 </li>
@@ -87,9 +87,9 @@
             <hr style="width: 15%; margin: auto">
             Within a Dimension:
             <ul style="margin-bottom: 10;">
-                <li><b>Dimension Weight</b>: (i.e. 10 out of 100) This represents the weight of the dimension in the overall quality score calculation.</li>
+                <li><b>Dimension Weight</b>: (i.e. 10 out of 100) This represents the weight of the dimension in the overall quality and utility score calculation.</li>
                 <ul>
-                    <li><i>For example, a weighting of 10% means that a score of 50 in this dimension contributes 5 points to the overall quality score.</i></li>
+                    <li><i>For example, a weighting of 10% means that a score of 50 in this dimension contributes 5 points to the overall quality and utility score.</i></li>
                 </ul>
             </ul>
             Within a Metric:
@@ -103,7 +103,7 @@
 
 <div class="card card-body mt-5 mb-3" style="padding-top: 1%; padding-bottom: 1%;">
     <p class="text-center" style="margin-bottom: 0%; padding-bottom: 0%;">
-        <b>Evaluate and report the following Data Quality Dimensions, within the given EHDS categories, to obtain <br> the Dataset Quality Label</b>
+        <b>Evaluate and report the following Data Quality & Utility Dimensions, within the given EHDS categories, to obtain <br> the Dataset Quality & Utility Label</b>
     </p>
 </div>
 
@@ -297,7 +297,7 @@
 <div class="row mt-5">
     <div class="col-sm-4 text-end">
         <a href="/dashboard">
-            <button id="go_back" type="button" class="btn btn-primary">Go to DQ Dashboard</button>
+            <button id="go_back" type="button" class="btn btn-primary">Go to DQ&U Dashboard</button>
         </a>
     </div>
     <div class="col-sm-4 text-center">
@@ -307,7 +307,7 @@
     </div>
     <div class="col-sm-4 text-start">
         <a href="/dataset/label?id={{dataset.id}}">
-            <button id="go_rdf" type="button" class="btn btn-primary">Go to DQ label</button>
+            <button id="go_rdf" type="button" class="btn btn-primary">Go to DQ&U label</button>
         </a>
     </div>
 </div>
