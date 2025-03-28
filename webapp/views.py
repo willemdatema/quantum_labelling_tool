@@ -347,11 +347,17 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
                 if type(metric_report_url) is str and metric_report_url.strip() == '':
                     metric_report_url = None
 
-                # If metric value is not "empty"
-                if metric_value != '-' and metric_value != '':
+                # If metric value is "empty" is for deleting it
+                if metric_value == '-':
+                    metrics.append(
+                        (metric_key, None, None)
+                    )
+                # Update a current metric value
+                elif metric_value != '':
                     metrics.append(
                         (metric_key, metric_value, metric_report_url)
                     )
+
         assessment = dataset.dq_assessment
 
         # We create or update the filled values
@@ -381,7 +387,17 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
                 'dq_assessment': assessment,
             }
 
-            if is_report_url_valid:
+            # Value to None means to remove it
+            if value is None:
+                current_dq_value = DQMetricValue.objects.filter(**lookup_fields)
+
+                if current_dq_value:
+                    current_dq_value.delete()
+                    changes.append(f'{dq_metric.dq_dimension.name} updated')
+
+                continue
+
+            if validated_report_url:
                 update_fields = {
                     'report_URL': validated_report_url,
                     'value': value
@@ -1196,8 +1212,13 @@ def organization_maturity_view(request: HttpRequest) -> HttpResponse:
                 else:
                     continue
 
+                # If metric value is -, to remove if exists
+                if dimension_value == '-':
+                    dimensions.append(
+                        (dimension_key, None)
+                    )
                 # If metric value is not "empty"
-                if dimension_value != '-' and dimension_value != '':
+                elif dimension_value != '':
                     dimensions.append(
                         (dimension_key, dimension_value)
                     )
@@ -1206,6 +1227,21 @@ def organization_maturity_view(request: HttpRequest) -> HttpResponse:
         changes = []
         for dimension in dimensions:
             maturity_dimension = MaturityDimension.objects.get(id=dimension[0])
+
+            # If value is '-' remove if exists
+            if not dimension[1]:
+                lookup_fields = {
+                    'maturity_dimension': maturity_dimension,
+                }
+
+                previous_maturity_dimension_level = MaturityDimensionValue.objects.filter(**lookup_fields)
+
+                if len(previous_maturity_dimension_level) > 0:
+                    previous_maturity_dimension_level[0].delete()
+
+                changes.append(maturity_dimension.name)
+
+                continue
 
             value = int(dimension[1])
 
