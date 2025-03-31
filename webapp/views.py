@@ -1101,7 +1101,9 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                         'score': 0,
                         'metric_label': metric_label,
                         'answer': answer_text,
-                        'is_metric_ok': False
+                        'is_metric_ok': False,
+                        'is_zero_with_answer': False,
+                        'is_zero_unanswered': False 
                     })
 
                     dq_metric_value = DQMetricValue.objects.filter(dq_assessment=assessment, dq_metric=metric)
@@ -1110,21 +1112,24 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
 
                     if len(dq_metric_value) >= 1:
                         current_value = str(dq_metric_value.first().value)
-                    else:
-                        pass
 
-                    if getattr(metric, 'dqcategoricalmetric') is not None and current_value:
-                        current_value = int(current_value)
-                        metric_categories = DQCategoricalMetricCategory.objects.filter(
-                            dq_categorical_metric=metric
-                        ).count()
+                    if getattr(metric, 'dqcategoricalmetric') is not None:
+                        if current_value is not None and current_value.isdigit():
+                            current_value = int(current_value)
+                            metric_categories = DQCategoricalMetricCategory.objects.filter(
+                                dq_categorical_metric=metric
+                            ).count()
 
-                        # If 3 : 0, 1, 2 -> 0% 50% 100%
-                        metric_score = current_value / (metric_categories - 1)
-                        metric_score = metric_score * (metric.weight / 100) * results[-1]['dimensions'][-1]['relevance']
+                            # Compute metric score
+                            metric_score = current_value / (metric_categories - 1)
+                            metric_score *= (metric.weight / 100) * results[-1]['dimensions'][-1]['relevance']
+                            results[-1]['dimensions'][-1]['metrics'][-1]['score'] = metric_score
+                            results[-1]['dimensions'][-1]['score'] += metric_score
 
-                        results[-1]['dimensions'][-1]['metrics'][-1]['score'] = metric_score
-                        results[-1]['dimensions'][-1]['score'] += metric_score
+                            if metric_score == 0:
+                                results[-1]['dimensions'][-1]['metrics'][-1]['is_zero_with_answer'] = True
+                        else:
+                            results[-1]['dimensions'][-1]['metrics'][-1]['is_zero_unanswered'] = True
 
                     results[-1]['dimensions'][-1]['metrics'][-1]['is_metric_ok'] = metric_score > 0
                     results[-1]['dimensions'][-1]['all_metrics_ok'] = results[-1]['dimensions'][-1]['all_metrics_ok'] and results[-1]['dimensions'][-1]['metrics'][-1]['is_metric_ok']
