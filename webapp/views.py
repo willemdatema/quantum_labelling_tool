@@ -397,13 +397,14 @@ def user_dataset_assessment_view(request: HttpRequest) -> HttpResponse:
 
                 continue
 
-            if validated_report_url:
+            if is_report_url_valid:
                 update_fields = {
                     'report_URL': validated_report_url,
                     'value': value
                 }
             else:
                 update_fields = {
+                    'report_URL': None,
                     'value': value
                 }
 
