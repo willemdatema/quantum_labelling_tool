@@ -1104,7 +1104,7 @@ def dataset_label_view(request: HttpRequest) -> HttpResponse:
                         'answer': answer_text,
                         'is_metric_ok': False,
                         'is_zero_with_answer': False,
-                        'is_zero_unanswered': False 
+                        'is_zero_unanswered': False
                     })
 
                     dq_metric_value = DQMetricValue.objects.filter(dq_assessment=assessment, dq_metric=metric)
@@ -1238,22 +1238,25 @@ def organization_maturity_view(request: HttpRequest) -> HttpResponse:
         for dimension in dimensions:
             maturity_dimension = MaturityDimension.objects.get(id=dimension[0])
 
+            lookup_fields = {
+                'maturity_dimension': maturity_dimension,
+            }
+            previous_maturity_dimension_level = MaturityDimensionValue.objects.filter(**lookup_fields)
+
             # If value is '-' remove if exists
             if not dimension[1]:
-                lookup_fields = {
-                    'maturity_dimension': maturity_dimension,
-                }
-
-                previous_maturity_dimension_level = MaturityDimensionValue.objects.filter(**lookup_fields)
-
                 if len(previous_maturity_dimension_level) > 0:
                     previous_maturity_dimension_level[0].delete()
 
-                changes.append(maturity_dimension.name)
-
+                    changes.append(maturity_dimension.name)
                 continue
 
             value = int(dimension[1])
+
+            # If exists and the value is the same than before
+            if len(previous_maturity_dimension_level) > 0:
+                if previous_maturity_dimension_level[0].maturity_dimension_level.value == value:
+                    continue
 
             maturity_dimension_level = MaturityDimensionLevel.objects.get(
                 maturity_dimension=maturity_dimension,
@@ -1265,6 +1268,7 @@ def organization_maturity_view(request: HttpRequest) -> HttpResponse:
                 maturity_organization=user_organization
             )
 
+            # If no previous value or it is distinct to before
             if maturity_dimension_value.maturity_dimension_level is None or \
                     maturity_dimension_value.maturity_dimension_level.value != value:
                 changes.append(maturity_dimension.name)
