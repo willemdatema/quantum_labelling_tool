@@ -69,6 +69,7 @@ A precondition is that the precision of variables is documented in the data dict
 
 Validity or conformance checks refer to variable level tests for:
 - data types (syntax)"','For each variable, the dataset report should contain computational checks for variable level syntax conformance (.i.e., conformance with expected syntax as per the data model)','n/a',100.0,12,1);
+
 INSERT INTO webapp_dqcategoricalmetric (dqmetric_ptr_id) VALUES
 	 (1),
 	 (2),
