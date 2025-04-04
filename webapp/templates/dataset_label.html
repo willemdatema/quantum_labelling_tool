@@ -104,21 +104,25 @@
 
             <h2 class="text-center mt-5">Maturity score: {{ maturity_percentage }}% ({{ maturity_score }}/50)</h2>
 
-
+            
+            {% if information_box_needed %}
             <div class="accordion mb-1" id="accordion_comments" style="margin-top: 50px;">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
-                        <button id="button_comments" class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        <button id="button_comments" class="accordion-button collapsed" type="button"
+                                data-bs-toggle="collapse"
                                 data-bs-target="#collapseCategory_comments"
                                 aria-controls="collapseCategory_comments">
                             <h2><b>Comments</b></h2>
                         </button>
                     </h2>
+
                     <div id="collapseCategory_comments" class="accordion-collapse collapse"
-                         data-bs-parent="#accordion_comments">  <!--!!this is the content that expands or collapses when the button is clicked.-->
-                        <div class="accordion-body"> <!-- The accordion-body contains the content that is displayed when the accordion is expanded. The content is dynamically generated using the category, dimension, and metric information. -->
-                            <div class="accordion mb-1" id="accordion_measureZERO">
-                                <!--Another accordion is created for each dimension under its respective category, identified uniquely using both the category and dimension IDs.-->
+                        data-bs-parent="#accordion_comments">
+                        <div class="accordion-body">
+
+                            <!-- First sub-section: Score = 0 due to selected level -->
+                            <div class="accordion mb-3" id="accordion_measureZERO">
                                 <div class="accordion-item">
                                     <h2 class="accordion-header">
                                         <button class="accordion-button collapsed" type="button"
@@ -130,17 +134,15 @@
                                         </button>
                                     </h2>
                                     <div id="collapseCategory_measureZERO"
-                                         class="accordion-collapse collapse"
-                                         data-bs-parent="#accordion_measureZERO">
+                                        class="accordion-collapse collapse"
+                                        data-bs-parent="#accordion_measureZERO">
                                         <div class="accordion-body">
                                             <div class="row mt-3" id="info">
                                                 <div class="card card-body alert alert-warning">
-                                                        <span>
-                                                            <b>Below are displayed the dimensions and metrics that scored zero based on the value selected in the DQ&U Assessment</b>
-                                                        </span>
+                                                    <span>
+                                                        <b>Below are displayed the dimensions and metrics that scored zero based on the value selected in the DQ&U Assessment</b>
+                                                    </span>
                                                     <hr>
-                                                    {% if information_box_needed %}
-                                
                                                     {% for category in results %}
                                                         {% for dimension in category.dimensions %}
                                                             {% for metric in dimension.metrics %}
@@ -154,15 +156,13 @@
                                                     {% endfor %}
                                                 </div>
                                             </div>
-                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="accordion-body"> <!-- The accordion-body contains the content that is displayed when the accordion is expanded. The content is dynamically generated using the category, dimension, and metric information. -->
+
+                            <!-- Second sub-section: Score = 0 due to no selection -->
                             <div class="accordion mb-3" id="accordion_notAnswer">
-                                <!--Another accordion is created for each dimension under its respective category, identified uniquely using both the category and dimension IDs.-->
                                 <div class="accordion-item">
                                     <h2 class="accordion-header">
                                         <button class="accordion-button collapsed" type="button"
@@ -174,16 +174,15 @@
                                         </button>
                                     </h2>
                                     <div id="collapseCategory_notAnswer"
-                                         class="accordion-collapse collapse"
-                                         data-bs-parent="#accordion_notAnswer">
+                                        class="accordion-collapse collapse"
+                                        data-bs-parent="#accordion_notAnswer">
                                         <div class="accordion-body">
                                             <div class="row mt-3" id="info">
                                                 <div class="card card-body alert alert-warning">
-                                                        <span>
-                                                            <b>Below are displayed the dimensions and metrics that have not been answered in the DQ&U Assessment (Score = 0)</b>
-                                                        </span>
+                                                    <span>
+                                                        <b>Below are displayed the dimensions and metrics that have not been answered in the DQ&U Assessment (Score = 0)</b>
+                                                    </span>
                                                     <hr>
-                                                    {% if information_box_needed %}
                                                     {% for category in results %}
                                                         {% for dimension in category.dimensions %}
                                                             {% for metric in dimension.metrics %}
@@ -197,15 +196,16 @@
                                                     {% endfor %}
                                                 </div>
                                             </div>
-                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+                        </div> <!-- end accordion-body -->
+                    </div> <!-- end collapseCategory_comments -->
+                </div> <!-- end accordion-item -->
+            </div> <!-- end accordion_comments -->
+            {% endif %}
 
 
             <div class="row mt-5">
@@ -361,4 +361,6 @@
         <div class="col-md-2 col-sm-12"></div>
     </div>
 </div>
+
+<div class="text-center" style=" margin-top:10px; margin-bottom: 20px;"><i>Need help? Visit the Help Center or create a ticket by <a href="https://quantumproject.zohodesk.eu/portal/en/home" target="_blank"> clicking here</a></div></i>
 {% endblock %}
