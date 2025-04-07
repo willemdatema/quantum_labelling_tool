@@ -2,7 +2,7 @@
   
 ![Python Version](https://img.shields.io/badge/python-3.11%2B-brightgreen.svg) <br>
 
-Cite the code:  [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14637282.svg)](https://doi.org/10.5281/zenodo.14637282)
+Cite the code:  [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14637281.svg)](https://doi.org/10.5281/zenodo.14637281)
 
 ## Introduction
 
