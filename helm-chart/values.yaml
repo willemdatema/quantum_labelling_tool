@@ -1,0 +1,15 @@
+
+appName: quantum-labelling-tool
+replicaCount: 1
+image:
+  repository: 
+  tag: "latest"
+service:
+  type: "ClusterIP"
+  port: 80
+  targetPort: 8000
+ingress:
+  enabled: true
+  host: "my-app.example.com"
+  clusterIssuer: letsencrypt
+  path: "/"

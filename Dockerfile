@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-COPY online_quantum_tool /online_quantum_tool
+COPY . /online_quantum_tool
 
 WORKDIR /online_quantum_tool
 

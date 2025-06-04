@@ -1,0 +1,10 @@
+name: quantum-labelling-helm-chart
+version: 0.1.0
+description: A Helm chart for deploying the Quantum Labelling application
+apiVersion: v2
+type: application
+keywords:
+  - helm
+  - chart
+  - kubernetes
+  - application

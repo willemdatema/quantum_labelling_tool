@@ -1,0 +1,9 @@
+documentation/
+db.sqlite3
+.zenodo.json
+CITATION.cff
+docker-compose.yml
+Dockerfile
+LICENSE.md
+README.md
+.git

@@ -58,17 +58,6 @@ python manage.py runserver 0.0.0.0:8000
 ## Dockerizing
 
 - Download the repository. When unzipped, the folder will be named "quantum_labelling_tool"
-- For Dockerizing create a folder called "QUANTUM" where needed
-- Inside QUANTUM create the folder "online_quantum_tool", which will contain the django web app.
-- From "quantum_labelling_tool" copy the following files and folders to the "QUANTUM/online_quantum_tool" folder:
-  - code
-  - quantum
-  - static
-  - staticfiles
-  - templates
-  - webapp
-  - manage.py
-- Copy the content of "quantum_labelling_tool/docker" inside "QUANTUM" (keep in mind that it contains an .env file, which may be hidden)
 - In the "QUANTUM" folder execute by bash:
 ```bash
 docker build -t quantum_online_tool .
@@ -108,6 +97,86 @@ source /docker-entrypoint-initdb.d/init.sql;
 ```
 
 - See "Usage" sections
+
+## Deploy with Helm
+
+Create a `values.db.yaml` file with the following content:
+
+**Don't forget to add a root password and database**
+
+```yaml
+auth:
+  rootPassword: 
+  database: 
+image:
+  tag: 10.6.14
+primary:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+  persistence:
+    enabled: true
+    existingClaim: "" # Set to your PVC name if you have one, or leave empty to let Helm create it
+    mountPath: ./database:/var/lib/mysql
+    size: 8Gi # Adjust as needed
+
+service:
+  type: ClusterIP
+  port: 3306
+
+# Optional: Healthcheck customization
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 5
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 5
+```
+
+Afterwards create a `values.application.yaml` file like follows:
+
+**Don't forget to edit host, image repository, DJANGO_WEB_URL & DJANGO_ALLOWED_HOSTS**
+
+```yaml
+ingress:
+  host: quantum.example.com
+  enabled: true
+
+  clusterIssuer: letsencrypt
+containerPort: 8000
+image:
+  repository: example.com/quantum
+  tag: latest
+env:
+  QUANTUM_DATABASE : quantum
+  QUANTUM_ROOT_PASSWORD : root
+  QUANTUM_DATABASE_HOST : quantum-mariadb
+  QUANTUM_DATABASE_PORT : 3306
+  DJANGO_DEBUG : 0
+  DJANGO_WEB_URL: https://quantum.example.com
+  DJANGO_ALLOWED_HOSTS: quantum.example.com
+```
+
+With these files you can install the charts with the following commands:
+
+```
+helm upgrade --install quantum-mariadb bitnami/mariadb --version 20.5.6 -f values.db.yaml
+```
+
+```
+helm upgrade --install quantum <relative-path-to-helm-chart-in-this-repo> -f values.application.yaml
+```
 
 ## Technology Stack
 
